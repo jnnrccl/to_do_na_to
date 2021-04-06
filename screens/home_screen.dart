@@ -9,6 +9,10 @@ import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/add_task_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  int selectedDestination;
+
+  HomeScreen({this.selectedDestination});
+  
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -209,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0.0,
         iconTheme: IconThemeData(color: Colors.white),
       ),
-      drawer: DrawerNavigation(),
+      drawer: DrawerNavigation(selectedDestination: 0),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.indigo,
         child: Icon(
