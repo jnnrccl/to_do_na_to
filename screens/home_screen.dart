@@ -212,6 +212,60 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.indigo,
         elevation: 0.0,
         iconTheme: IconThemeData(color: Colors.white),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.grid_view,
+              color: Colors.white,
+            ),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return SimpleDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  title: Text(
+                    'Select display view',
+                    style: GoogleFonts.rubik(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  children: <Widget>[
+                    SimpleDialogOption(
+                      onPressed: () {},
+                      child: Text(
+                        'List',
+                        style: GoogleFonts.rubik(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    SimpleDialogOption(
+                      onPressed: () {},
+                      child: Text(
+                        'Calendar',
+                        style: GoogleFonts.rubik(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    SimpleDialogOption(
+                      onPressed: () {},
+                      child: Text(
+                        'Kanban',
+                        style: GoogleFonts.rubik(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            ),
+          ),
+        ]
       ),
       drawer: DrawerNavigation(selectedDestination: 0),
       floatingActionButton: FloatingActionButton(
@@ -241,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemBuilder: (BuildContext context, int index) {
                   if (index == 0) {
                     return Container(
-                      padding: EdgeInsets.only(left: 40.0, top: 5.0, right: 40.0, bottom: 30.0),
+                      padding: EdgeInsets.only(left: 40.0, top: 5.0, right: 40.0, bottom: 26.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
                           bottomRight: Radius.circular(80.0),
