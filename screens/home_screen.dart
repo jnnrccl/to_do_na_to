@@ -243,7 +243,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SimpleDialogOption(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CalendarScreen(selectedDestination: 0),
+                            ),
+                          ),
                       child: Text(
                         'Calendar',
                         style: GoogleFonts.rubik(
