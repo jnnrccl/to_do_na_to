@@ -8,6 +8,9 @@ import 'package:to_do_na_to/helpers/drawer_navigation.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/add_task_screen.dart';
 
+import 'calendar_screen.dart';
+import 'kanban_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   int selectedDestination;
 
@@ -257,7 +260,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SimpleDialogOption(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => KanbanScreen(selectedDestination: 0),
+                            ),
+                          ),
                       child: Text(
                         'Kanban',
                         style: GoogleFonts.rubik(
