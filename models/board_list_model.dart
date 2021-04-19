@@ -1,11 +1,10 @@
 
-
-import 'board_item_model.dart';
+import 'package:flutter_todo_nato_app/models/task_model.dart';
 
 class BoardListObject{
 
   String title;
-  List<BoardItemObject> items;
+  List<Task> items;
 
   BoardListObject({this.title,this.items}){
     if(this.title == null){
