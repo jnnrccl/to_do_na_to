@@ -65,10 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       margin: EdgeInsets.only(left: 15.0),
                     ),
-                    /*Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),*/
                     Text(
                       "Delete",
                       style: GoogleFonts.rubik(
@@ -76,14 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 18.0,
                         fontWeight: FontWeight.w500,
                       ),
-                      //textAlign: TextAlign.left,
                     ),
                     SizedBox(
                       width: 10,
                     ),
                   ],
                 ),
-                //alignment: Alignment.centerLeft,
               ),
             ),
             secondaryBackground: Container(
@@ -107,10 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       margin: EdgeInsets.only(right: 260.0),
                     ),
-                    /*Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),*/
                     Text(
                       "Delete",
                       style: GoogleFonts.rubik(
@@ -118,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 18.0,
                         fontWeight: FontWeight.w500,
                       ),
-                      //textAlign: TextAlign.right,
                     ),
                     SizedBox(width: 10),
                   ],
@@ -170,10 +159,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                      /*VerticalDivider(
-                        color: Colors.indigo,
-                        thickness: 1.3,
-                      ),*/
                     ],
                   ),
                   title: Text(
@@ -211,81 +196,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.indigo,
-        elevation: 0.0,
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.grid_view,
-              color: Colors.white,
-            ),
-            onPressed: () => showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return SimpleDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  title: Text(
-                    'Select display view',
-                    style: GoogleFonts.rubik(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  children: <Widget>[
-                    SimpleDialogOption(
-                      onPressed: () {},
-                      child: Text(
-                        'List',
-                        style: GoogleFonts.rubik(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    SimpleDialogOption(
-                      onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CalendarScreen(selectedDestination: 0),
-                            ),
-                          ),
-                      child: Text(
-                        'Calendar',
-                        style: GoogleFonts.rubik(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    SimpleDialogOption(
-                      onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => KanbanScreen(selectedDestination: 0),
-                            ),
-                          ),
-                      child: Text(
-                        'Kanban',
-                        style: GoogleFonts.rubik(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-            ),
-          ),
-        ]
-      ),
       drawer: DrawerNavigation(selectedDestination: 0),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.indigo,
         child: Icon(
             Icons.add,
-            //color: Colors.white,
         ),
         onPressed: () => Navigator.push(context, MaterialPageRoute(
           builder: (_) => AddTaskScreen(
@@ -295,57 +210,128 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       body: FutureBuilder(
-            future: _taskList,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              return ListView.builder(
-                padding: EdgeInsets.only(top: 0),
-                itemCount: 1 + snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index == 0) {
-                    return Container(
-                      padding: EdgeInsets.only(left: 40.0, top: 5.0, right: 40.0, bottom: 26.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(80.0),
-                        ),
-                        color: Colors.indigo,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            'Hello there!',
-                            style: GoogleFonts.rubik(
-                              color: Colors.white,
-                              fontSize: 35,
-                              fontWeight: FontWeight.w400,
-                              //fontStyle: FontStyle.normal,
-                            ),
-                          ),
-                          //SizedBox(height: 10.0),
-                          Text(
-                            'This is your to-do list.',
-                            style: GoogleFonts.rubik(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w200,
-                              //fontStyle: FontStyle.italic,
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  }
-                  return _buildTask(snapshot, index, snapshot.data[index - 1]);
-                },
+          future: _taskList,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: CircularProgressIndicator(),
               );
-            },
-          ),
+            }
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverAppBar(
+                  floating: true,
+                  actions: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.apps),
+                      onPressed: () => showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SimpleDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              title: Text(
+                                'Select display view',
+                                style: GoogleFonts.rubik(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              children: <Widget>[
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => HomeScreen(selectedDestination: 0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'List',
+                                    style: GoogleFonts.rubik(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CalendarScreen(selectedDestination: 0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Calendar',
+                                    style: GoogleFonts.rubik(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => KanbanScreen(selectedDestination: 0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Kanban',
+                                    style: GoogleFonts.rubik(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                      ),
+                    ),
+                  ],
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      if (index == 0) {
+                        return Container(
+                          padding: EdgeInsets.only(left: 40.0, top: 5.0, right: 40.0, bottom: 26.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(80.0),
+                            ),
+                            color: Colors.indigo,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Hello there!',
+                                style: GoogleFonts.rubik(
+                                  color: Colors.white,
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              Text(
+                                'This is your to-do list.',
+                                style: GoogleFonts.rubik(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w200,
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      }
+                      return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                    },
+                    childCount: 1 + snapshot.data.length,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
     );
   }
 }
