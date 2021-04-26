@@ -1,5 +1,4 @@
 import 'package:intl/intl.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:to_do_na_to/helpers/database_connection.dart';
@@ -22,7 +21,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   DateTime _date = DateTime.now();
   TextEditingController _dateController = TextEditingController();
 
-  final DateFormat _dateFormatter = DateFormat('MMM dd, yyyy');
+  final DateFormat _dateFormatter = DateFormat('MMM d, yyyy');
   final List<String> _priorities = ['Low', 'Medium', 'High'];
 
   @override
@@ -58,12 +57,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       }
   }
 
-  /*_delete() {
-    DatabaseConnection.instance.deleteTask(widget.task.id);
-    widget.updateTaskList();
-    Navigator.pop(context);
-  }*/
-
   _submit() {
     if(_formKey.currentState.validate()) {
       _formKey.currentState.save();
@@ -77,11 +70,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         date: _date,
       );
       if(widget.task == null) {
+        task.status = 0;
         DatabaseConnection.instance.insertTask(task);
       }
       else {
         //Update the task
         task.id = widget.task.id;
+        task.status = widget.task.status;
         DatabaseConnection.instance.updateTask(task);
       }
       widget.updateTaskList();
@@ -92,6 +87,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.indigo,
+        child: Icon(Icons.save_rounded, color: Colors.white),
+        onPressed: _submit,
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
@@ -227,45 +227,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                           value: _priority,
                         ),
                       ),
-                      Container(
-                        margin: EdgeInsets.symmetric(vertical: 20.0),
-                        height: 60.0,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                        child: TextButton(
-                          child: Text(
-                            widget.task == null ? 'Add' : 'Update',
-                            style: GoogleFonts.rubik(
-                              color: Colors.white,
-                              fontSize: 20.0,
-                            ),
-                          ),
-                          onPressed: _submit,
-                        ),
-                      ),
-                      /*widget.task != null ? Container(
-                        //margin: EdgeInsets.symmetric(vertical: 20.0),
-                        height: 60.0,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent,
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                        child: FlatButton(
-                          child: Text(
-                            'Remove',
-                            style: GoogleFonts.rubik(
-                              color: Colors.white,
-                              fontSize: 20.0,
-                            ),
-                          ),
-                          onPressed: _delete,
-                        ),
-                      )
-                      : SizedBox.shrink(),*/
                     ],
                   ),
                 ),
