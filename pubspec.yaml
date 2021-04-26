@@ -21,6 +21,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  curved_navigation_bar: ^0.3.7
   google_fonts: ^2.0.0
   intl: ^0.17.0
   flutter:
@@ -28,7 +29,7 @@ dependencies:
   sqflite: ^2.0.0+3
   path_provider: ^2.0.1
   table_calendar: ^2.0.1
-  boardview: ^0.2.0
+  material_design_icons_flutter: ^4.0.5955
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
