@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
-
-import 'package:todo_na_to/helpers/database_connection.dart';
-import 'package:todo_na_to/helpers/drawer_navigation.dart';
-import 'package:todo_na_to/models/task_model.dart';
-
+import 'package:to_do_na_to/helpers/database_connection.dart';
+import 'package:to_do_na_to/helpers/drawer_navigation.dart';
+import 'package:to_do_na_to/screens/home_screen.dart';
+import 'package:to_do_na_to/models/task_model.dart';
 import 'add_task_screen.dart';
-import 'home_screen.dart';
-import 'kanban_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   int selectedDestination;
@@ -20,157 +18,199 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-
   Future<List<Task>> _taskList;
-  final DateFormat _dateFormatter = DateFormat('MMM dd, yyyy');
+  final DateFormat _dateFormatter = DateFormat('MMM d');
   CalendarController calController;
   DateTime _selectedDate = DateTime.now();
 
   @override
   void initState(){
     super.initState();
-    calController=CalendarController();
+    calController = CalendarController();
     _updateTaskList();
   }
 
   _updateTaskList() {
     setState(() {
-      _taskList = DatabaseHelper.instance.getTasksOnDate(convertDateTimeDisplay(_selectedDate.toString()));
+      _taskList = DatabaseConnection.instance.getTasksOnDate(convertDateTimeDisplay(_selectedDate.toString()));
       print(convertDateTimeDisplay(_selectedDate.toString()));
       //_taskList = DatabaseHelper.instance.getTaskList();
     });
   }
 
   getDiff() {
-
-    var now=DateTime.now();
+    var now = DateTime.now();
     if(_dateFormatter.format(_selectedDate)==_dateFormatter.format(now)) return "Today";
     return _dateFormatter.format(_selectedDate).toString();
-
   }
 
   Widget _buildTask(snapshot, index, task){
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 25.0),
-      child: Column(
-        children: <Widget> [
-          //SizedBox(height: 10.0),
-          Container(color: Colors.red),
-          Dismissible(
-            key: Key(task.id.toString()),
-            onDismissed: (direction) {
-              snapshot.data.removeAt(index-1);
-              DatabaseHelper.instance.deleteTask(task.id);
-              _updateTaskList();
-            },
-            background: Container(color: Colors.red),
-            child: ListTile(
-              title: Text(
-                '${task.taskName}',
-                style: GoogleFonts.rubik(
-                  color: Colors.white,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w600,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget> [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.indigo,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.indigo,
+                blurRadius: 0.0,
+                spreadRadius: 0.0,
+                offset: Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 25.0),
+            child: Dismissible(
+              key: UniqueKey(),
+              background: Container(
+                padding: EdgeInsets.symmetric(vertical: 3.0),
+                margin: EdgeInsets.symmetric(vertical: 3.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.tealAccent.shade700,
+                ),
+                child: Align(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.only(left: 15.0),
+                      ),
+                      Text(
+                        "Complete",
+                        style: GoogleFonts.rubik(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                    ],
+                  ),
+                  //alignment: Alignment.centerLeft,
                 ),
               ),
-              subtitle: Text(
-                '${_dateFormatter.format(task.date)} • ${task.priority}',
-                style: GoogleFonts.rubik(
-                  color: Colors.white,
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.w400,
+              secondaryBackground: Container(
+                padding: EdgeInsets.symmetric(vertical: 3.0),
+                margin: EdgeInsets.symmetric(vertical: 3.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.redAccent,
+                ),
+                child: Align(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.only(right: 260.0),
+                      ),
+                      Text(
+                        "Delete",
+                        style: GoogleFonts.rubik(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                  alignment: Alignment.centerRight,
                 ),
               ),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AddTaskScreen(
-                  updateTaskList: _updateTaskList,
-                  task: task,
-                ),),
+              onDismissed: (direction) {
+                snapshot.data.removeAt(index-1);
+                DatabaseConnection.instance.deleteTask(task.id);
+                _updateTaskList();
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 3.0),
+                margin: EdgeInsets.symmetric(vertical: 3.0),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: ListTile(
+                  leading: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget> [
+                      Container(
+                        width: 95.0,
+                        child: Center(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '${task.subjectName}',
+                              style: GoogleFonts.rubik(
+                                color: Colors.indigo,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  title: Text(
+                    '${task.taskName}',
+                    style: GoogleFonts.rubik(
+                      color: Colors.indigo,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${task.priority}',
+                    style: GoogleFonts.rubik(
+                      color: Colors.indigo,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => AddTaskScreen(
+                      updateTaskList: _updateTaskList,
+                      task: task,
+                    ),),
+                  ),
+                ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        SizedBox(
+          height: 5.0,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.indigo,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.indigo,
+                  blurRadius: 0.0,
+                  spreadRadius: 0.0,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
     );
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.indigo,
-          elevation: 0.0,
-          iconTheme: IconThemeData(color: Colors.white),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.grid_view,
-                color: Colors.white,
-              ),
-              onPressed: () => showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return SimpleDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      title: Text(
-                        'Select display view',
-                        style: GoogleFonts.rubik(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      children: <Widget>[
-                        SimpleDialogOption(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => HomeScreen(selectedDestination: 0),
-                            ),
-                          ),
-                          child: Text(
-                            'List',
-                            style: GoogleFonts.rubik(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        SimpleDialogOption(
-                          onPressed: () {},
-                          child: Text(
-                            'Calendar',
-                            style: GoogleFonts.rubik(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        SimpleDialogOption(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => KanbanScreen(selectedDestination: 0),
-                            ),
-                          ),
-                          child: Text(
-                            'Kanban',
-                            style: GoogleFonts.rubik(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-              ),
-            ),
-          ]
-      ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.indigo,
-        child: Icon(Icons.add),
+        backgroundColor: Colors.tealAccent.shade700,
+        child: Icon(Icons.add, color: Colors.white),
         onPressed: () { Navigator.push(
           context,
           MaterialPageRoute(
@@ -178,8 +218,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               updateTaskList: _updateTaskList,
             ),
           ),
-        );
-        },
+        );},
       ),
       drawer: DrawerNavigation(selectedDestination: 0),
       body: FutureBuilder (
@@ -190,123 +229,231 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 child: CircularProgressIndicator(),
               );
             }
-            return SingleChildScrollView(
-              child: Container(
-                //padding: EdgeInsets.only(top: 50),
-                child: Column(
-                  children: [
-                    TableCalendar(
-                      startingDayOfWeek: StartingDayOfWeek.monday,
-                      calendarStyle: CalendarStyle(
-                          weekdayStyle: TextStyle(color: Colors.indigo ,fontWeight: FontWeight.normal,fontSize: 14),
-                          weekendStyle: TextStyle(color: Colors.indigo,fontWeight: FontWeight.normal,fontSize: 14),
-                          selectedColor: Colors.indigo,
-                          todayColor: Colors.indigo,
-                          todayStyle: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white
-                          )
-                      ),
-                      onDaySelected: (date,events,holiday) {
-                        setState(() {
-                          _selectedDate = date;
-                          _updateTaskList();
-                        });
-                      },
-                      builders: CalendarBuilders(
-                          selectedDayBuilder: (context,date,events)=>
-                              Container(
-                                margin: EdgeInsets.all(5.0),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Colors.indigo,
-
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Text(
-                                  date.day.toString(),
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold
-                                  ),),
-                              )
-                      ),
-                      daysOfWeekStyle: DaysOfWeekStyle(
-                          weekendStyle: TextStyle(
-                              color: Colors.indigo,
-                              fontWeight: FontWeight.bold
-                          ),
-                          weekdayStyle: TextStyle(
-                              color: Colors.indigo,
-                              fontWeight: FontWeight.bold
-                          )
-
-                      ),
-                      headerStyle: HeaderStyle(
-                          formatButtonVisible: false,
-                          centerHeaderTitle: true,
-                          titleTextStyle: TextStyle(
-                            color: Colors.indigo,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                          leftChevronIcon: Icon(
-                            Icons.chevron_left,
-                            color: Colors.indigo,
-                          ),
-                          rightChevronIcon: Icon(
-                            Icons.chevron_right,
-                            color: Colors.indigo,
-                          )
-                      ),
-                      calendarController: calController,
-                    ),
-                    SizedBox(height: 30,),
-                    Container(
-                      padding: EdgeInsets.only(left: 15,right: 10),
-                      height: MediaQuery.of(context).size.height,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                          color: Colors.indigo,
-                          borderRadius: BorderRadius.only(topRight: Radius.circular(50),topLeft: Radius.circular(30))
-                      ),
-                      child: Container(
-                        child: ListView.builder(
-                          itemCount: 1 + snapshot.data.length,
-                          itemBuilder: (BuildContext context, int index){
-                            if (index == 0) {
-                              print(index);
-                              print(snapshot.data);
-                              return Container(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: 50,),
-                                    Text(
-
-                                      getDiff(),
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 30
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-                            print(index);
-                            print(snapshot.data);
-
-                            return _buildTask(snapshot, index, snapshot.data[index - 1]);
-                          },
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverAppBar(
+                  pinned: true,
+                  actions: <Widget>[
+                    IconButton(
+                      icon: Icon(MdiIcons.formatListBulletedSquare),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => HomeScreen(),
                         ),
                       ),
                     ),
-
                   ],
                 ),
-              ),
+                SliverToBoxAdapter(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.only(left: 35.0, top: 5.0, right: 40.0, bottom: 30.0),
+                          decoration: BoxDecoration(
+                            color: Colors.indigo,
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(60.0),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.indigo,
+                                blurRadius: 0.0,
+                                spreadRadius: 0.0,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Hello there!',
+                                style: GoogleFonts.rubik(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w200,
+                                ),
+                              ),
+                              Text(
+                                'This is your calendar.',
+                                style: GoogleFonts.rubik(
+                                  color: Colors.white,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 10.0),
+                          margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                blurRadius: 2.0,
+                                offset: Offset(0.0, 1.0), // shadow direction: bottom right
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              TableCalendar(
+                                startingDayOfWeek: StartingDayOfWeek.sunday,
+                                calendarStyle: CalendarStyle(
+                                  weekdayStyle: GoogleFonts.rubik(color: Colors.indigo ,fontWeight: FontWeight.normal,fontSize: 14),
+                                  weekendStyle: GoogleFonts.rubik(color: Colors.indigo,fontWeight: FontWeight.normal,fontSize: 14),
+                                  selectedColor: Colors.indigo,
+                                  todayColor: Colors.indigo,
+                                  todayStyle: GoogleFonts.rubik(
+                                      fontSize: 14,
+                                      color: Colors.white
+                                  ),
+                                ),
+                                onDaySelected: (date,events,holiday) {
+                                  setState(() {
+                                    _selectedDate = date;
+                                    _updateTaskList();
+                                  });
+                                },
+                                builders: CalendarBuilders(
+                                  selectedDayBuilder: (context,date,events) =>
+                                      Container(
+                                        margin: EdgeInsets.all(5.0),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Colors.tealAccent.shade700,
+                                          borderRadius: BorderRadius.circular(15),
+                                        ),
+                                        child: Text(
+                                          date.day.toString(),
+                                          style: GoogleFonts.rubik(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold
+                                          ),
+                                        ),
+                                      ),
+                                ),
+                                daysOfWeekStyle: DaysOfWeekStyle(
+                                  weekendStyle: GoogleFonts.rubik(
+                                      color: Colors.indigo,
+                                      fontWeight: FontWeight.w600,
+                                  ),
+                                  weekdayStyle: GoogleFonts.rubik(
+                                      color: Colors.indigo,
+                                      fontWeight: FontWeight.w600
+                                  ),
+                                ),
+                                headerStyle: HeaderStyle(
+                                    formatButtonVisible: false,
+                                    centerHeaderTitle: true,
+                                    titleTextStyle: GoogleFonts.rubik(
+                                      color: Colors.indigo,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 22,
+                                    ),
+                                    leftChevronIcon: Icon(
+                                      Icons.chevron_left,
+                                      color: Colors.indigo,
+                                    ),
+                                    rightChevronIcon: Icon(
+                                      Icons.chevron_right,
+                                      color: Colors.indigo,
+                                    )
+                                ),
+                                calendarController: calController,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      if (index == 0) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 18.0),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(35),
+                                  topRight: Radius.circular(35),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.indigo,
+                                    blurRadius: 0.0,
+                                    spreadRadius: 0.0,
+                                    offset: Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    "Due",
+                                    style: GoogleFonts.rubik(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  Text(
+                                    getDiff(),
+                                    style: GoogleFonts.rubik(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 28,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            //SizedBox(height: 10),
+                          ],
+                        );
+                      }
+                      return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                    },
+                    childCount: 1 + snapshot.data.length,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 80.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.indigo,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.indigo,
+                            blurRadius: 0.0,
+                            spreadRadius: 0.0,
+                            offset: Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Container(
+                    decoration: BoxDecoration(color: Colors.indigo),
+                  ),
+                ),
+              ],
             );
           }
       ),
@@ -315,9 +462,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 }
 
 String convertDateTimeDisplay(String date) {
-  final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
-  final DateFormat serverFormater = DateFormat('yyyy-MM-dd');
-  final DateTime displayDate = displayFormater.parse(date);
-  final String formatted = serverFormater.format(displayDate);
+  final DateFormat displayFormatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+  final DateFormat serverFormatter = DateFormat('yyyy-MM-dd');
+  final DateTime displayDate = displayFormatter.parse(date);
+  final String formatted = serverFormatter.format(displayDate);
   return formatted;
 }
