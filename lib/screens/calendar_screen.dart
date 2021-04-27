@@ -23,14 +23,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
   CalendarController calController;
   DateTime _selectedDate = DateTime.now();
   Map<DateTime, List<dynamic>> _events;
-  List<dynamic> _selectedEvents;
 
   @override
   void initState(){
     super.initState();
     calController = CalendarController();
     _events = {};
-    _selectedEvents = [];
+    //_selectedEvents = [];
     _updateTaskList();
   }
 
@@ -48,7 +47,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       DateTime date = DateTime(
           event.date.year, event.date.month, event.date.day, 12);
       if (data[date] == null) data[date] = [];
-      data[date].add(event);
+      if(event.status != 2) {
+        data[date].add(event);
+      }
     });
     return data;
   }
@@ -138,8 +139,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ),
               onDismissed: (direction) {
-                snapshot.data.removeAt(index-1);
-                DatabaseConnection.instance.deleteTask(task.id);
+                if (direction == DismissDirection.endToStart){
+                  snapshot.data.removeAt(index-1);
+                  DatabaseConnection.instance.deleteTask(task.id);
+                }
+                else{
+                  task.status = 2;
+                  DatabaseConnection.instance.updateTask(task);
+                  //print(snapshot.data[index-1].status);
+                  snapshot.data.removeAt(index-1);
+                }
                 _updateTaskList();
               },
               child: Container(
@@ -339,7 +348,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               ),
                               onDaySelected: (date,events,holiday) {
                                 setState(() {
-                                  _selectedEvents = events;
+                                  //_selectedEvents = events;
                                   _selectedDate = date;
                                   _updateTaskList();
                                 });
@@ -450,6 +459,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       DateTime day = snapshot.data[index-1].date;
 
                       if(day.year == _selectedDate.year && day.month == _selectedDate.month && day.day == _selectedDate.day){
+                        if(snapshot.data[index-1].status == 0 || snapshot.data[index-1].status == 1)
                         return _buildTask(snapshot, index, snapshot.data[index-1]);
                       }
 

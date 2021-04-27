@@ -115,8 +115,16 @@ class _ToDoScreenState extends State<ToDoScreen> {
               ),
             ),
             onDismissed: (direction) {
-              snapshot.data.removeAt(index-1);
-              DatabaseConnection.instance.deleteTask(task.id);
+              if (direction == DismissDirection.endToStart){
+                snapshot.data.removeAt(index-1);
+                DatabaseConnection.instance.deleteTask(task.id);
+              }
+              else{
+                task.status = 1;
+                DatabaseConnection.instance.updateTask(task);
+                //print(snapshot.data[index-1].status);
+                snapshot.data.removeAt(index-1);
+              }
               _updateTaskList();
             },
             child: ClipRRect(
@@ -225,7 +233,12 @@ class _ToDoScreenState extends State<ToDoScreen> {
                         color: Colors.transparent,
                       );
                     }
-                    return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                    if(snapshot.data[index - 1].status == 0){
+                      return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                    }
+
+                    return Container();
+
                   },
                   childCount: 1 + snapshot.data.length,
                 ),

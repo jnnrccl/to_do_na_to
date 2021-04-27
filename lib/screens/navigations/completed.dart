@@ -225,7 +225,11 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
                         color: Colors.transparent,
                       );
                     }
-                    return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                    if(snapshot.data[index - 1].status == 2){
+                      return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                    }
+
+                    return Container();
                   },
                   childCount: 1 + snapshot.data.length,
                 ),
