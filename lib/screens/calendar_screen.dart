@@ -8,6 +8,7 @@ import 'package:to_do_na_to/helpers/drawer_navigation.dart';
 import 'package:to_do_na_to/screens/home_screen.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'add_task_screen.dart';
+import 'package:to_do_na_to/notifications/local_notifications.dart';
 
 class CalendarScreen extends StatefulWidget {
   int selectedDestination;
@@ -139,6 +140,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ),
               onDismissed: (direction) {
+                Notifications().deleteTask(task);
                 if (direction == DismissDirection.endToStart){
                   snapshot.data.removeAt(index-1);
                   DatabaseConnection.instance.deleteTask(task.id);
@@ -460,7 +462,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                       if(day.year == _selectedDate.year && day.month == _selectedDate.month && day.day == _selectedDate.day){
                         if(snapshot.data[index-1].status == 0 || snapshot.data[index-1].status == 1)
-                        return _buildTask(snapshot, index, snapshot.data[index-1]);
+                          return _buildTask(snapshot, index, snapshot.data[index-1]);
                       }
 
                       return Container(color: Colors.indigo);

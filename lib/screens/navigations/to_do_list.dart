@@ -7,6 +7,7 @@ import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/helpers/drawer_navigation.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/add_task_screen.dart';
+import 'package:to_do_na_to/notifications/local_notifications.dart';
 
 // ignore: must_be_immutable
 class ToDoScreen extends StatefulWidget {
@@ -118,6 +119,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
               if (direction == DismissDirection.endToStart){
                 snapshot.data.removeAt(index-1);
                 DatabaseConnection.instance.deleteTask(task.id);
+                Notifications().deleteTask(task);
               }
               else{
                 task.status = 1;

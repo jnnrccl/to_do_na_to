@@ -93,6 +93,18 @@ class DatabaseConnection{
     return result;
   }
 
+  Future<List<Task>> getTask (int id) async {
+    Database db = await this.db;
+    final List<Map<String, dynamic>> task  = await db.rawQuery('SELECT * FROM task_table WHERE id = ?', [id]);
+
+    final List<Task> taskList = [];
+    task.forEach((taskMap){
+      taskList.add(Task.fromMap(taskMap));
+    });
+    return taskList;
+
+  }
+
 
 
 }

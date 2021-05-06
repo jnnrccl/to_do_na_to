@@ -30,6 +30,8 @@ dependencies:
   path_provider: ^2.0.1
   table_calendar: ^2.0.1
   material_design_icons_flutter: ^4.0.5955
+  flutter_local_notifications: ^5.0.0+3
+  shared_preferences: ^2.0.5
 
 
   # The following adds the Cupertino Icons font to your application.

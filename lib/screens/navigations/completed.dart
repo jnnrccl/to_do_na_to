@@ -7,6 +7,7 @@ import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/helpers/drawer_navigation.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/add_task_screen.dart';
+import 'package:to_do_na_to/notifications/local_notifications.dart';
 
 // ignore: must_be_immutable
 class CompletedNavigationScreen extends StatefulWidget {
@@ -115,6 +116,7 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
               ),
             ),
             onDismissed: (direction) {
+              Notifications().deleteTask(task);
               snapshot.data.removeAt(index-1);
               DatabaseConnection.instance.deleteTask(task.id);
               _updateTaskList();
