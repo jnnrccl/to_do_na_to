@@ -504,7 +504,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
 String convertDateTimeDisplay(String date) {
   final DateFormat displayFormatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
-  final DateFormat serverFormatter = DateFormat('yyyy-MM-dd');
+  final DateFormat serverFormatter = DateFormat('yyyy-MM-dd HH:mm');
   final DateTime displayDate = displayFormatter.parse(date);
   final String formatted = serverFormatter.format(displayDate);
   return formatted;

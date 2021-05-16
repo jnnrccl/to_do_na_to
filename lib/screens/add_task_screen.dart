@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:to_do_na_to/notifications/local_notifications.dart';
 import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/models/task_model.dart';
+import 'package:to_do_na_to/utils/validator.dart';
 
 
 // ignore: must_be_immutable
@@ -26,7 +27,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   DateTime _date = DateTime.now();
   TextEditingController _dateController = TextEditingController();
 
-  final DateFormat _dateFormatter = DateFormat('MMM d, yyyy');
+  final DateFormat _dateFormatter = DateFormat('yyyy-MM-dd HH:mm');
   final List<String> _priorities = ['Low', 'Medium', 'High'];
 
   bool enableNotif = false;
@@ -68,7 +69,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           setState(() {
             _date = finalDate;
           });
-          _dateController.text = _dateFormatter.format(onlyDate);
+          _dateController.text = _dateFormatter.format(finalDate);
         }
       }
     }
@@ -91,13 +92,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
       //* CREATE TASK
       if (widget.task == null) {
-        Notifications().scheduleTask(localTask);
         DatabaseConnection.instance.insertTask(localTask);
+        if (enableNotif == true)
+          Notifications().scheduleTask(localTask);
       }
       //UPDATE TASK
       else {
-        Notifications().updateTask(localTask);
         DatabaseConnection.instance.updateTask(localTask);
+        if (enableNotif == true)
+          Notifications().updateTask(localTask);
       }
       widget.updateTaskList();
       Navigator.pop(context);
@@ -158,9 +161,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
                             ),
-                            validator: (input) => input.trim().isEmpty
-                                ? 'Please enter a subject name.'
-                                : null,
+                            validator: FieldValidator.validateSubjectName,
                             onSaved: (input) => _subjectName = input,
                             initialValue: _subjectName,
                           ),
@@ -181,9 +182,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10.0),
                                 )),
-                            validator: (input) => input.trim().isEmpty
-                                ? 'Please enter a task title.'
-                                : null,
+                            validator: FieldValidator.validateTaskName,
                             onSaved: (input) => _taskName = input,
                             initialValue: _taskName,
                           ),
@@ -198,12 +197,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                               fontWeight: FontWeight.w300,
                             ),
                             onTap: _handleDatePicker,
-                            validator: (value) {
-                              if (_date.compareTo(DateTime.now()) < 0) {
-                                return 'Wrong Date Time';
-                              }
-                              return null;
-                            },
+                            validator: FieldValidator.validateDate,
                             decoration: InputDecoration(
                                 labelText: 'Deadline',
                                 labelStyle: GoogleFonts.rubik(
@@ -247,9 +241,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10.0),
                                 )),
-                            validator: (input) => _priority == null
-                                ? 'Please enter a priority level.'
-                                : null,
+                            validator: FieldValidator.validatePriority,
                             onChanged: (value) {
                               setState(() {
                                 _priority = value;

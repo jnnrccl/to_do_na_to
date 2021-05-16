@@ -39,6 +39,13 @@ class DatabaseConnection{
         'CREATE TABLE $tasksTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colSubject TEXT, $colTask TEXT, $colDate TEXT, $colPriority TEXT, $colStatus INTEGER)');
   }
 
+  Future<void> deleteDb() async {
+    Directory dir = await getApplicationDocumentsDirectory();
+    String path = dir.path + 'todo_nato.db';
+    await deleteDatabase(path);
+    // delete database
+  }
+
   Future<List<Map<String, dynamic>>> getTaskMapList() async {
     Database db = await this.db;
     final List<Map<String, dynamic>> result = await db.query(tasksTable);
