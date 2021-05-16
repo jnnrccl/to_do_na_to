@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:to_do_na_to/notifications/local_notifications.dart';
+import 'package:to_do_na_to/helpers/local_notification.dart';
 import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/utils/validator.dart';

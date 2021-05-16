@@ -8,7 +8,7 @@ import 'package:to_do_na_to/helpers/drawer_navigation.dart';
 import 'package:to_do_na_to/screens/home_screen.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'add_task_screen.dart';
-import 'package:to_do_na_to/notifications/local_notifications.dart';
+import 'package:to_do_na_to/helpers/local_notification.dart';
 
 class CalendarScreen extends StatefulWidget {
   int selectedDestination;
