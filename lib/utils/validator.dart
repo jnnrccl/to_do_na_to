@@ -24,7 +24,7 @@ class FieldValidator{
 
   static String validateDate(String value) {
     DateTime date = DateTime.parse(value);
-    print(value);
+    //print(value);
     if (date.compareTo(DateTime.now()) < 0) {
       return 'Wrong Date Time';
     }

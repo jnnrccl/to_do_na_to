@@ -10,9 +10,10 @@ class Task{
   DateTime date;
   String priority;
   int status; // 0 - incomplete, 1 - complete
+  List<String> scheduler;
 
-  Task({this.subjectName, this.taskName, this.date, this.priority, this. status});
-  Task.withID({this.id, this.subjectName, this.taskName, this.date, this.priority, this. status});
+  Task({this.subjectName, this.taskName, this.date, this.priority, this. status,this.scheduler});
+  Task.withID({this.id, this.subjectName, this.taskName, this.date, this.priority, this. status,this.scheduler});
 
   Map<String, dynamic> toMap() {
     final map = Map<String, dynamic>();
@@ -25,6 +26,7 @@ class Task{
     map['date'] = convertDateTimeDisplay(date.toString()); //date.toIso8601String();
     map['priority'] = priority;
     map['status'] = status;
+    map['scheduler'] = convertListToString(scheduler);
     return map;
   }
 
@@ -36,6 +38,7 @@ class Task{
       date: convertStringToDate(map['date']),
       priority: map['priority'],
       status: map['status'],
+      scheduler: convertStringToList(map['scheduler']),
     );
   }
 }
@@ -52,4 +55,23 @@ DateTime convertStringToDate(String date){
   String dateWithT = date + 'T0:00:00.00000';
   DateTime dateTime = DateTime.parse(date);
   return dateTime;
+}
+
+String convertListToString(List<String> scheduler){
+  if(scheduler.length == 0){
+    return ' ';
+  }
+  else{
+    return scheduler.join(",");
+  }
+}
+
+List<String> convertStringToList(String text){
+  if (text == ' '){
+    return [];
+  }
+  else{
+    return text.split(',');
+  }
+
 }

@@ -25,6 +25,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   String _taskName = '';
   String _priority;
   DateTime _date = DateTime.now();
+  List <String> _scheduler = [];
   TextEditingController _dateController = TextEditingController();
 
   final DateFormat _dateFormatter = DateFormat('yyyy-MM-dd HH:mm');
@@ -41,6 +42,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       _taskName = widget.task.taskName;
       _priority = widget.task.priority;
       _date = widget.task.date;
+      _scheduler = widget.task.scheduler;
     }
     _dateController.text = _dateFormatter.format(_date);
   }
@@ -81,14 +83,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     Task localTask;
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      print('$_subjectName, $_taskName, $_date, $_priority');
+      print('$_subjectName, $_taskName, $_date, $_priority, $_scheduler');
       localTask = Task.withID(
           id: widget.task?.id ?? next,
           subjectName: _subjectName,
           taskName: _taskName,
           priority: _priority,
           date: _date,
-          status: 0);
+          status: 0,
+          scheduler: _scheduler,
+      );
 
       //* CREATE TASK
       if (widget.task == null) {
@@ -99,6 +103,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       //UPDATE TASK
       else {
         DatabaseConnection.instance.updateTask(localTask);
+        print('$_scheduler');
         if (enableNotif == true)
           Notifications().updateTask(localTask);
       }

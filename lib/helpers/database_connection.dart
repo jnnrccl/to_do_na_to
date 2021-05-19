@@ -19,6 +19,7 @@ class DatabaseConnection{
   String colDate = 'date';
   String colPriority = 'priority';
   String colStatus = 'status';
+  String colScheduler = 'scheduler';
 
   Future<Database> get db async {
     if (_db == null){
@@ -36,7 +37,7 @@ class DatabaseConnection{
 
   void _createDb(Database db, int version) async{
     await db.execute(
-        'CREATE TABLE $tasksTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colSubject TEXT, $colTask TEXT, $colDate TEXT, $colPriority TEXT, $colStatus INTEGER)');
+        'CREATE TABLE $tasksTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colSubject TEXT, $colTask TEXT, $colDate TEXT, $colPriority TEXT, $colStatus INTEGER, $colScheduler TEXT)');
   }
 
   Future<void> deleteDb() async {
