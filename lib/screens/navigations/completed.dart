@@ -5,9 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/helpers/drawer_navigation.dart';
+import 'package:to_do_na_to/helpers/local_notification.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/add_task_screen.dart';
-import 'package:to_do_na_to/helpers/local_notification.dart';
 
 // ignore: must_be_immutable
 class CompletedNavigationScreen extends StatefulWidget {
@@ -21,7 +21,7 @@ class CompletedNavigationScreen extends StatefulWidget {
 
 class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
   Future<List<Task>> _taskList;
-  final DateFormat _dateFormatter = DateFormat('MMM d, yyyy');
+  final DateFormat _dateFormatter = DateFormat('MMM d, h:mm a');
 
   @override
   void initState() {
@@ -171,7 +171,7 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    '${_dateFormatter.format(task.date)} • ${task.priority}',
+                    'Due ${_dateFormatter.format(task.date)}',
                     style: GoogleFonts.rubik(
                       color: Colors.indigo,
                       fontSize: 12.0,
@@ -217,7 +217,6 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
             );
           }
           return CustomScrollView(
-            //shrinkWrap: true,
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -230,7 +229,6 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
                     if(snapshot.data[index - 1].status == 2){
                       return _buildTask(snapshot, index, snapshot.data[index - 1]);
                     }
-
                     return Container();
                   },
                   childCount: 1 + snapshot.data.length,

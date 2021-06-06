@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/helpers/drawer_navigation.dart';
+import 'package:to_do_na_to/helpers/local_notification.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/add_task_screen.dart';
-import 'package:to_do_na_to/helpers/local_notification.dart';
 
 // ignore: must_be_immutable
 class ToDoScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class ToDoScreen extends StatefulWidget {
 
 class _ToDoScreenState extends State<ToDoScreen> {
   Future<List<Task>> _taskList;
-  final DateFormat _dateFormatter = DateFormat('MMM d, yyyy');
+  final DateFormat _dateFormatter = DateFormat('MMM d, h:mm a');
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
       _taskList = DatabaseConnection.instance.getTaskList();
     });
   }
+
 
   Widget _buildTask(snapshot, index, Task task) {
     return Padding(
@@ -124,7 +126,6 @@ class _ToDoScreenState extends State<ToDoScreen> {
               else{
                 task.status = 1;
                 DatabaseConnection.instance.updateTask(task);
-                //print(snapshot.data[index-1].status);
                 snapshot.data.removeAt(index-1);
               }
               _updateTaskList();
@@ -138,7 +139,13 @@ class _ToDoScreenState extends State<ToDoScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border(
-                    left: BorderSide(width: 10.5, color: Colors.indigo),
+                    left: BorderSide(
+                      width: 10.5,
+                      color:
+                      task.priority == 'Low' ? Colors.yellow.shade800
+                          : task.priority == 'Medium' ? Colors.orange.shade800
+                          : Colors.red,
+                    ),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -179,7 +186,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    '${_dateFormatter.format(task.date)} • ${task.priority}',
+                    'Due ${_dateFormatter.format(task.date)}',
                     style: GoogleFonts.rubik(
                       color: Colors.indigo,
                       fontSize: 12.0,
@@ -225,7 +232,6 @@ class _ToDoScreenState extends State<ToDoScreen> {
             );
           }
           return CustomScrollView(
-            //shrinkWrap: true,
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -238,16 +244,15 @@ class _ToDoScreenState extends State<ToDoScreen> {
                     if(snapshot.data[index - 1].status == 0){
                       return _buildTask(snapshot, index, snapshot.data[index - 1]);
                     }
-
                     return Container();
-
                   },
                   childCount: 1 + snapshot.data.length,
                 ),
               ),
               SliverToBoxAdapter(
-                child: SizedBox(
+                child: Container(
                   height: 80.0,
+                  color: Colors.transparent,
                 ),
               ),
             ],

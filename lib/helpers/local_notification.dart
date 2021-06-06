@@ -1,15 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:to_do_na_to/helpers/database_connection.dart';
-import 'package:to_do_na_to/models/task_model.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
 class Notifications {
-  //Future<List<Task>> allTasks;
-  //List<Task> taskList;
-
   String _groupKey = 'com.android.example.to_do_na_to';
   String _groupId = 'to_do_na_to';
   String _groupName = 'to_do_na_to_group';
@@ -18,8 +13,7 @@ class Notifications {
   AndroidNotificationDetails _notificationAndroidSpecifics;
   NotificationDetails _notificationPlatformSpecifics;
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   AndroidInitializationSettings androidInitializationSettings;
   InitializationSettings initializationSettings;
 
@@ -40,7 +34,7 @@ class Notifications {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 
-
+  // ignore: missing_return
   Future onSelectNotification(String payLoad) {
     if (payLoad != null) {
       print("you clicked notification");
@@ -54,7 +48,9 @@ class Notifications {
       content: Text(body),
       actions: <Widget>[
         CupertinoDialogAction(
-            isDefaultAction: true, onPressed: () {}, child: Text("Okay")),
+            isDefaultAction: true,
+            onPressed: () {},
+            child: Text("Okay")),
       ],
     );
   }
@@ -80,16 +76,18 @@ class Notifications {
     );
     _notificationPlatformSpecifics =
         NotificationDetails(android: _notificationAndroidSpecifics);
+
     _saveTask(task);
-    List list =
-    await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-    print(list);
+
+    List list = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    //print(list);
     print('Number of Task Notifications =  ${list.length}');
   }
 
   deleteTask(task) async {
     debugPrint('DELETING....');
     await flutterLocalNotificationsPlugin.cancel(task.secondId);
+    await flutterLocalNotificationsPlugin.cancel(task.thirdId);
     await flutterLocalNotificationsPlugin.cancel(task.id);
   }
 
@@ -99,34 +97,76 @@ class Notifications {
   }
 
   _saveTask(task) {
-
-    DateTime currentDate = DateTime.now();
-
     flutterLocalNotificationsPlugin.zonedSchedule(
       task.id,
       'Task Reminder',
-      'Task ${task.taskName}: ${task.subjectName} is due!',
+      '${task.subjectName}: ${task.taskName} is due!',
       tz.TZDateTime.from(task.date, tz.local),
       _notificationPlatformSpecifics,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       androidAllowWhileIdle: true,
     );
-
-
     var dayBefore = task.date.day;
     var x = dayBefore.compareTo(DateTime.now().day);
-    print(x);
+    //print(x);
+
     if (x > 0) {
-      print('hala');
+      flutterLocalNotificationsPlugin.zonedSchedule(
+        task.thirdId,
+        'Task Reminder',
+        '${task.subjectName}: ${task.taskName} is due today at ${task.date.hour}:${task.date.minute}!',
+        tz.TZDateTime.from(DateTime(task.date.year, task.date.month, task.date.day), tz.local),
+        _notificationPlatformSpecifics,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        androidAllowWhileIdle: true,
+      );
+      //DateTime curr =   tz.TZDateTime.from(DateTime(task.date.year, task.date.month, task.date.day), tz.local);
+      //print(curr);
       flutterLocalNotificationsPlugin.zonedSchedule(
         task.secondId,
         'Task Reminder',
-        'Task ${task.taskName}: ${task.subjectName} is due tomorrow!',
+        '${task.subjectName}: ${task.taskName} is due tomorrow at ${task.date.hour}:${task.date.minute}!',
         tz.TZDateTime.from(task.date.subtract(Duration(days: 1)), tz.local),
         _notificationPlatformSpecifics,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         androidAllowWhileIdle: true,
       );
     }
+  }
+
+  scheduleTaskScheduler(task) async {
+    debugPrint('Created....');
+    tz.initializeTimeZones();
+    _notificationAndroidSpecifics = AndroidNotificationDetails(
+      _groupId,
+      _groupName,
+      _groupDescription,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      groupKey: _groupKey,
+      largeIcon: DrawableResourceAndroidBitmap('app_icon'),
+      ledOnMs: 1000,
+      ledOffMs: 500,
+      ledColor: Colors.redAccent,
+      color: Colors.indigo,
+      visibility: NotificationVisibility.public,
+      styleInformation: DefaultStyleInformation(true, true),
+    );
+
+    _notificationPlatformSpecifics = NotificationDetails(android: _notificationAndroidSpecifics);
+    //DateTime currentDate = DateTime.now();
+
+    flutterLocalNotificationsPlugin.zonedSchedule(
+      task.id,
+      'REMINDERS',
+      '${task.subjectName} : Do ${task.taskName} now!',
+      tz.TZDateTime.from(task.date, tz.local),
+      _notificationPlatformSpecifics,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidAllowWhileIdle: true,
+    );
+    List list = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    print(list);
+    print('Number of Task Notifications =  ${list.length}');
   }
 }

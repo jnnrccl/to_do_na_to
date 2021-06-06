@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:to_do_na_to/screens/calendar_screen.dart';
 import 'package:to_do_na_to/screens/navigations/to_do_list.dart';
 import 'package:to_do_na_to/screens/navigations/completed.dart';
 import 'package:to_do_na_to/screens/navigations/in_progress.dart';
-
 import '../helpers/drawer_navigation.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -50,63 +50,76 @@ class _HomeScreenState extends  State<HomeScreen> {
     return Scaffold(
       drawer: DrawerNavigation(selectedDestination: 0),
       body: NestedScrollView(
+        floatHeaderSlivers: true,
         controller: _hideBottomNavController,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverAppBar(
-              pinned: true,
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(MdiIcons.calendar),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CalendarScreen(selectedDestination: 0),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              sliver: MultiSliver(
                 children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(left: 35.0, top: 5.0, right: 40.0, bottom: 30.0),
-                    decoration: BoxDecoration(
-                      color: Colors.indigo,
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(60.0),
+                  SliverAppBar(
+                    backgroundColor: Colors.indigo,
+                    pinned: true,
+                    actions: <Widget>[
+                      IconButton(
+                        icon: Icon(MdiIcons.calendar),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CalendarScreen(selectedDestination: 0),
+                          ),
+                        ),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.indigo,
-                          blurRadius: 0.0,
-                          spreadRadius: 0.0,
-                          offset: Offset(0, 1),
-                        ),
-                      ],
-                    ),
+                    ],
+                  ),
+                  SliverToBoxAdapter(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        Text(
-                          _pageIndex == 0 ? 'Hello there!' : 'Tasks',
-                          style: GoogleFonts.rubik(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w200,
+                        Container(
+                          color: Colors.transparent,
+                          child: Container(
+                            padding: EdgeInsets.only(left: 35.0, top: 5.0, right: 40.0, bottom: 30.0),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo,
+                              borderRadius: BorderRadius.only(
+                                bottomRight: Radius.circular(60.0),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.indigo,
+                                  blurRadius: 0.0,
+                                  spreadRadius: 0.0,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  _pageIndex == 0 ? 'Hello there!'
+                                      : _pageIndex == 1 ? 'Hey!' : 'Good job!',
+                                  style: GoogleFonts.rubik(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w200,
+                                  ),
+                                ),
+                                Text(
+                                  _pageIndex == 0 ? "This is your to-do list."
+                                      : _pageIndex == 1 ? "Time to finish these." : "You aced these tasks.",
+                                  style: GoogleFonts.rubik(
+                                    color: Colors.white,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                        Text(
-                          _pageIndex == 0 ? 'This is your to-do list.'
-                              : _pageIndex == 1 ? 'in progress' : 'completed',
-                          style: GoogleFonts.rubik(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        )
                       ],
                     ),
                   ),

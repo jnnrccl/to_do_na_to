@@ -8,7 +8,6 @@ import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/utils/validator.dart';
 
-
 // ignore: must_be_immutable
 class AddTaskScreen extends StatefulWidget {
   final Function updateTaskList;
@@ -85,16 +84,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       _formKey.currentState.save();
       print('$_subjectName, $_taskName, $_date, $_priority, $_scheduler');
       localTask = Task.withID(
-          id: widget.task?.id ?? next,
-          subjectName: _subjectName,
-          taskName: _taskName,
-          priority: _priority,
-          date: _date,
-          status: 0,
-          scheduler: _scheduler,
+        id: widget.task?.id ?? next,
+        subjectName: _subjectName,
+        taskName: _taskName,
+        priority: _priority,
+        date: _date,
+        status: 0,
+        scheduler: _scheduler,
+        stopTime: "00:00:00:00",
       );
-
-      //* CREATE TASK
+      //CREATE TASK
       if (widget.task == null) {
         DatabaseConnection.instance.insertTask(localTask);
         if (enableNotif == true)
@@ -115,153 +114,157 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.indigo,
-          child: Icon(Icons.save_rounded, color: Colors.white),
-          onPressed: _submit,
-        ),
-        body: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: SingleChildScrollView(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 80.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        size: 25.0,
-                        color: Colors.indigo,
-                      )),
-                  SizedBox(height: 20.0),
-                  Text(
-                    widget.task == null ? 'Add a task' : 'Edit task',
-                    style: GoogleFonts.rubik(
-                      color: Colors.black,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w500,
-                    ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.indigo,
+        child: Icon(Icons.save_rounded, color: Colors.white),
+        onPressed: _submit,
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 80.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      size: 25.0,
+                      color: Colors.indigo,
+                    )),
+                SizedBox(height: 20.0),
+                Text(
+                  widget.task == null ? 'Add a task' : 'Edit task',
+                  style: GoogleFonts.rubik(
+                    color: Colors.black,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w500,
                   ),
-                  SizedBox(height: 15.0),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10.0),
-                          child: TextFormField(
-                            style: GoogleFonts.rubik(
-                              fontSize: 18,
+                ),
+                SizedBox(height: 15.0),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
+                        child: TextFormField(
+                          style: GoogleFonts.rubik(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: 'Subject Name',
+                            labelStyle: GoogleFonts.rubik(
+                              fontSize: 18.0,
                               fontWeight: FontWeight.w300,
                             ),
-                            decoration: InputDecoration(
-                              labelText: 'Subject Name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                          ),
+                          validator: FieldValidator.validateSubjectName,
+                          onSaved: (input) => _subjectName = input,
+                          initialValue: _subjectName,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
+                        child: TextFormField(
+                          style: GoogleFonts.rubik(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300,
+                          ),
+                          decoration: InputDecoration(
+                              labelText: 'Task Title',
                               labelStyle: GoogleFonts.rubik(
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.w300,
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.0),
+                              )),
+                          validator: FieldValidator.validateTaskName,
+                          onSaved: (input) => _taskName = input,
+                          initialValue: _taskName,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
+                        child: TextFormField(
+                          readOnly: true,
+                          controller: _dateController,
+                          style: GoogleFonts.rubik(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300,
+                          ),
+                          onTap: _handleDatePicker,
+                          validator: FieldValidator.validateDate,
+                          decoration: InputDecoration(
+                              labelText: 'Deadline',
+                              labelStyle: GoogleFonts.rubik(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w300,
                               ),
-                            ),
-                            validator: FieldValidator.validateSubjectName,
-                            onSaved: (input) => _subjectName = input,
-                            initialValue: _subjectName,
-                          ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              )),
                         ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10.0),
-                          child: TextFormField(
-                            style: GoogleFonts.rubik(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w300,
-                            ),
-                            decoration: InputDecoration(
-                                labelText: 'Task Title',
-                                labelStyle: GoogleFonts.rubik(
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
+                        child: DropdownButtonFormField(
+                          icon: Icon(Icons.arrow_drop_down),
+                          //iconSize: 25.0,
+                          iconEnabledColor: Colors.indigo,
+                          items: _priorities.map((String priority) {
+                            return DropdownMenuItem(
+                              value: priority,
+                              child: Text(
+                                priority,
+                                style: GoogleFonts.rubik(
+                                  color:
+                                  priority == 'Low' ? Colors.yellow.shade800
+                                      : priority == 'Medium' ? Colors.orange.shade800
+                                      : Colors.red,
                                   fontSize: 18.0,
-                                  fontWeight: FontWeight.w300,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                )),
-                            validator: FieldValidator.validateTaskName,
-                            onSaved: (input) => _taskName = input,
-                            initialValue: _taskName,
+                              ),
+                            );
+                          }).toList(),
+                          style: GoogleFonts.rubik(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300,
                           ),
+                          decoration: InputDecoration(
+                              labelText: 'Priority',
+                              labelStyle: GoogleFonts.rubik(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w300,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              )),
+                          validator: FieldValidator.validatePriority,
+                          onChanged: (value) {
+                            setState(() {
+                              _priority = value;
+                            });
+                          },
+                          value: _priority,
                         ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10.0),
-                          child: TextFormField(
-                            readOnly: true,
-                            controller: _dateController,
-                            style: GoogleFonts.rubik(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w300,
-                            ),
-                            onTap: _handleDatePicker,
-                            validator: FieldValidator.validateDate,
-                            decoration: InputDecoration(
-                                labelText: 'Deadline',
-                                labelStyle: GoogleFonts.rubik(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w300,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                )),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10.0),
-                          child: DropdownButtonFormField(
-                            icon: Icon(Icons.arrow_drop_down),
-                            //iconSize: 25.0,
-                            iconEnabledColor: Colors.indigo,
-                            items: _priorities.map((String priority) {
-                              return DropdownMenuItem(
-                                value: priority,
-                                child: Text(
-                                  priority,
-                                  style: GoogleFonts.rubik(
-                                    color: Colors.black,
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            style: GoogleFonts.rubik(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w300,
-                            ),
-                            decoration: InputDecoration(
-                                labelText: 'Priority',
-                                labelStyle: GoogleFonts.rubik(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w300,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                )),
-                            validator: FieldValidator.validatePriority,
-                            onChanged: (value) {
-                              setState(() {
-                                _priority = value;
-                              });
-                            },
-                            value: _priority,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

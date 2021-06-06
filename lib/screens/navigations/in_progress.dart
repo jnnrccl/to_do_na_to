@@ -5,9 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_na_to/helpers/database_connection.dart';
 import 'package:to_do_na_to/helpers/drawer_navigation.dart';
+import 'package:to_do_na_to/helpers/local_notification.dart';
+import 'package:to_do_na_to/models/complete_task_model.dart';
 import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/add_task_screen.dart';
-import 'package:to_do_na_to/helpers/local_notification.dart';
 
 // ignore: must_be_immutable
 class InProgressNavigationScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class InProgressNavigationScreen extends StatefulWidget {
 
 class _InProgressNavigationScreenState extends State<InProgressNavigationScreen> {
   Future<List<Task>> _taskList;
-  final DateFormat _dateFormatter = DateFormat('MMM d, yyyy');
+  final DateFormat _dateFormatter = DateFormat('MMM d, h:mm a');
 
   @override
   void initState() {
@@ -34,6 +35,25 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
       _taskList = DatabaseConnection.instance.getTaskList();
     });
   }
+
+  _addTaskToComplete(task) async{
+    completedTask finished;
+    finished = completedTask(
+      date: DateTime.now(),
+      time: "00:00:00.00",
+    );
+    if (task.status == 1) {
+      finished.completed = 0;
+    }
+    else
+      finished.completed = 1;
+
+    DatabaseConnection.instance.insertCompletedTask(finished);
+    print("DZAEEE ARI ANG SIYA");
+    List list= await DatabaseConnection.instance.getCompletedTaskList();
+    print (list);
+  }
+
 
   Widget _buildTask(snapshot, index, Task task) {
     return Padding(
@@ -116,7 +136,6 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
               ),
             ),
             onDismissed: (direction) {
-              Notifications().deleteTask(task);
               if (direction == DismissDirection.endToStart){
                 snapshot.data.removeAt(index-1);
                 DatabaseConnection.instance.deleteTask(task.id);
@@ -124,9 +143,10 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
               else{
                 task.status = 2;
                 DatabaseConnection.instance.updateTask(task);
-                //print(snapshot.data[index-1].status);
+                _addTaskToComplete(task);
                 snapshot.data.removeAt(index-1);
               }
+              Notifications().deleteTask(task);
               _updateTaskList();
             },
             child: ClipRRect(
@@ -138,7 +158,13 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border(
-                    left: BorderSide(width: 10.5, color: Colors.indigo),
+                    left: BorderSide(
+                      width: 10.5,
+                      color:
+                      task.priority == 'Low' ? Colors.yellow.shade800
+                          : task.priority == 'Medium' ? Colors.orange.shade800
+                          : Colors.red,
+                    ),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -179,7 +205,7 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
                     ),
                   ),
                   subtitle: Text(
-                    '${_dateFormatter.format(task.date)} • ${task.priority}',
+                    'Due ${_dateFormatter.format(task.date)}',
                     style: GoogleFonts.rubik(
                       color: Colors.indigo,
                       fontSize: 12.0,
@@ -225,7 +251,6 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
             );
           }
           return CustomScrollView(
-            //shrinkWrap: true,
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -238,7 +263,6 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
                     if(snapshot.data[index - 1].status == 1){
                       return _buildTask(snapshot, index, snapshot.data[index - 1]);
                     }
-
                     return Container();
                   },
                   childCount: 1 + snapshot.data.length,

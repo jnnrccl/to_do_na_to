@@ -1,19 +1,43 @@
 import 'package:intl/intl.dart';
 
 class Task{
-
   //static String table = "events";
-
   int id;
   String subjectName;
   String taskName;
   DateTime date;
   String priority;
   int status; // 0 - incomplete, 1 - complete
+  String stopTime;
   List<String> scheduler;
 
-  Task({this.subjectName, this.taskName, this.date, this.priority, this. status,this.scheduler});
-  Task.withID({this.id, this.subjectName, this.taskName, this.date, this.priority, this. status,this.scheduler});
+  //ADDING SECOND ID FOR SECOND AND THIRD NOTIFICATION
+  int secondId, thirdId;
+
+  Task(
+      {this.subjectName,
+        this.taskName,
+        this.date,
+        this.priority,
+        this.status,
+        this.scheduler,
+        this.stopTime}) {
+    secondId = id + 100;
+    thirdId = id+200;
+  }
+
+  Task.withID(
+      {this.id,
+        this.subjectName,
+        this.taskName,
+        this.date,
+        this.priority,
+        this.status,
+        this.scheduler,
+        this.stopTime}) {
+    secondId = id + 100;
+    thirdId = id+200;
+  }
 
   Map<String, dynamic> toMap() {
     final map = Map<String, dynamic>();
@@ -27,6 +51,7 @@ class Task{
     map['priority'] = priority;
     map['status'] = status;
     map['scheduler'] = convertListToString(scheduler);
+    map['stopTime'] = stopTime;
     return map;
   }
 
@@ -39,20 +64,21 @@ class Task{
       priority: map['priority'],
       status: map['status'],
       scheduler: convertStringToList(map['scheduler']),
+      stopTime: map['stopTime'],
     );
   }
 }
 
 String convertDateTimeDisplay(String date) {
-  final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
-  final DateFormat serverFormater = DateFormat('yyyy-MM-dd HH:mm');
-  final DateTime displayDate = displayFormater.parse(date);
-  final String formatted = serverFormater.format(displayDate);
+  final DateFormat displayFormatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+  final DateFormat serverFormatter = DateFormat('yyyy-MM-dd HH:mm');
+  final DateTime displayDate = displayFormatter.parse(date);
+  final String formatted = serverFormatter.format(displayDate);
   return formatted;
 }
 
 DateTime convertStringToDate(String date){
-  String dateWithT = date + 'T0:00:00.00000';
+  //String dateWithT = date + 'T0:00:00.00000';
   DateTime dateTime = DateTime.parse(date);
   return dateTime;
 }
@@ -73,5 +99,4 @@ List<String> convertStringToList(String text){
   else{
     return text.split(',');
   }
-
 }

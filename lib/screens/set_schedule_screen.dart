@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_na_to/helpers/database_connection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:to_do_na_to/models/task_model.dart';
+import 'package:to_do_na_to/helpers/local_notification.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:to_do_na_to/utils/validator.dart';
 
@@ -22,16 +24,25 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
   List <String> listSchedule = [];
 
   AwesomeDialog dialog;
+  bool enableNotif = false;
 
   @override
   void initState() {
     super.initState();
+    _setVal();
     _updateTaskList();
   }
 
   _updateTaskList() {
     setState(() {
       _taskList = DatabaseConnection.instance.getTaskList();
+    });
+  }
+
+  _setVal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      enableNotif = prefs.getBool('enable_notif') ?? false;
     });
   }
 
@@ -72,7 +83,6 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
         date: task.date,
         status: task.status,
       );
-
       if (listSchedule != null){
         for (String element in listSchedule) {
           if(element == _date.toString()){
@@ -81,14 +91,26 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
           }
         }
       }
-
       if(same == false){
         listSchedule.add(_date.toString());
+        listSchedule.sort();
         localTask.scheduler = listSchedule;
         //print('$listSchedule');
         DatabaseConnection.instance.updateTask(localTask);
+        if (enableNotif == true){
+          Task tempTask;
+          tempTask = Task.withID(
+            id: task.id,
+            subjectName: task.subjectName,
+            taskName: task.taskName,
+            priority: task.priority,
+            date: _date,
+            status: task.status,
+            scheduler: listSchedule,
+          );
+          Notifications().scheduleTaskScheduler(tempTask);
+        }
       }
-
       dialog.dissmiss();
       widget.updateTaskList();
       Navigator.pop(context);
@@ -97,120 +119,108 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
 
   Widget _buildTask(snapshot, index, Task task) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 25.0),
+      padding: EdgeInsets.symmetric(horizontal: 5.0),
       child: Column(
         children: <Widget>[
-          SizedBox(height: 12.0),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 5.0),
-              margin: EdgeInsets.symmetric(vertical: 3.0),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  left: BorderSide(width: 10.5, color: Colors.indigo),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    blurRadius: 2.0,
-                    offset: Offset(0.0, 1.0), // shadow direction: bottom right
-                  ),
-                ],
-              ),
-              child: ListTile(
-                leading: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget> [
-                    Container(
-                      width: 95.0,
-                      child: Center(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            '${task.subjectName}',
-                            style: GoogleFonts.rubik(
-                              color: Colors.indigo,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w600,
-                            ),
+          //SizedBox(height: 5.0),
+          Container(
+            //padding: EdgeInsets.symmetric(vertical: 3.0),
+            margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.indigo,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: ListTile(
+              leading: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget> [
+                  Container(
+                    width: 95.0,
+                    child: Center(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${task.subjectName}',
+                          style: GoogleFonts.rubik(
+                            color: Colors.white,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-                title: Text(
-                  '${task.taskName}',
-                  style: GoogleFonts.rubik(
-                    color: Colors.indigo,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
                   ),
-                ),
-                subtitle: Text(
-                  '${_dateFormatter.format(task.date)} • ${task.priority}',
-                  style: GoogleFonts.rubik(
-                    color: Colors.indigo,
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                onTap: () {
-                  dialog = AwesomeDialog(
-                    context: context,
-                    animType: AnimType.SCALE,
-                    dialogType: DialogType.INFO,
-                    keyboardAware: true,
-                    body: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: <Widget>[
-                          Text(
-                            'Set a Schedule',
-                            style: Theme.of(context).textTheme.headline6,
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Form(
-                            key: _formKey,
-                            child: TextFormField(
-                              readOnly: true,
-                              controller: _dateController,
-                              style: GoogleFonts.rubik(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w300,
-                              ),
-                              onTap: _handleDatePicker,
-                              validator: FieldValidator.validateDate,
-                              decoration: InputDecoration(
-                                  labelText: 'Date',
-                                  labelStyle: GoogleFonts.rubik(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  )),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          AnimatedButton(
-                              text: 'Set',
-                              pressEvent: () {
-                                _submit(task);
-                              })
-                        ],
-                      ),
-                    ),
-                  )..show();
-                },
+                ],
               ),
+              title: Text(
+                '${task.taskName}',
+                style: GoogleFonts.rubik(
+                  color: Colors.white,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                '${_dateFormatter.format(task.date)} • ${task.priority}',
+                style: GoogleFonts.rubik(
+                  color: Colors.white,
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              onTap: () {
+                dialog = AwesomeDialog(
+                  context: context,
+                  animType: AnimType.SCALE,
+                  dialogType: DialogType.INFO,
+                  keyboardAware: true,
+                  body: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          'Set a Schedule',
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Form(
+                          key: _formKey,
+                          child: TextFormField(
+                            readOnly: true,
+                            controller: _dateController,
+                            style: GoogleFonts.rubik(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w300,
+                            ),
+                            onTap: _handleDatePicker,
+                            validator: FieldValidator.validateDate,
+                            decoration: InputDecoration(
+                                labelText: 'Date',
+                                labelStyle: GoogleFonts.rubik(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                )),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        AnimatedButton(
+                            text: 'Set',
+                            pressEvent: () {
+                              _submit(task);
+                            })
+                      ],
+                    ),
+                  ),
+                )..show();
+              },
             ),
           ),
         ],
@@ -221,63 +231,72 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: FutureBuilder(
-            future: _taskList,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              return SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 80.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Icon(
-                            Icons.arrow_back_ios,
-                            size: 25.0,
-                            color: Colors.indigo,
-                          )),
-                      SizedBox(height: 20.0),
-                      Text(
-                        'Choose a task',
-                        style: GoogleFonts.rubik(
-                          color: Colors.black,
-                          fontSize: 30,
-                          fontWeight: FontWeight.w500,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: FutureBuilder(
+          future: _taskList,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return CustomScrollView(
+              slivers: <Widget> [
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: EdgeInsets.only(left: 20.0, top: 80.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget> [
+                        GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Icon(
+                              Icons.arrow_back_ios,
+                              size: 25.0,
+                              color: Colors.indigo,
+                            )),
+                        SizedBox(height: 20.0),
+                        Text(
+                          'Select a task',
+                          style: GoogleFonts.rubik(
+                            color: Colors.black,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 15.0),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: 1 + snapshot.data.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          if (index == 0) {
-                            return Container(
-                              color: Colors.transparent,
-                            );
-                          }
-
-                          if(snapshot.data[index - 1].status == 0) {
-                            return _buildTask(snapshot, index, snapshot.data[index - 1]);
-                          }
-
-                          return Container();
-                        },
-                      ),
-                    ],
+                        SizedBox(height: 25.0),
+                      ],
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                      if (index == 0) {
+                        return Container(
+                          color: Colors.transparent,
+                        );
+                      }
+                      if(snapshot.data[index - 1].status != 2){
+                        return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                      }
+                      return Container(color: Colors.indigo);
+                    },
+                    childCount: 1 + snapshot.data.length,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                    child: Container(
+                      color: Colors.transparent,
+                      height: 20.0,
+                    )
+                ),
+              ],
+            );
+          },
         ),
-      );
+      ),
+    );
   }
 }

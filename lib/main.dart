@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:to_do_na_to/screens/home_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
+}
+
+class MyBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -15,9 +22,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.indigo,
+        //accentColor: Colors.white,
       ),
+      builder: (context, child) {
+        return ScrollConfiguration(
+          behavior: MyBehavior(),
+          child: child,
+        );
+      },
       home: HomeScreen(),
     );
   }
 }
-
