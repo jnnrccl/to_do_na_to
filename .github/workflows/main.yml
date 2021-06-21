@@ -19,3 +19,5 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings
       - run: flutter test
+      - name: "Run Flutter Driver tests"
+        run: "flutter drive --driver=test_driver/integration_driver.dart --target=integration_test/app_test.dart"
