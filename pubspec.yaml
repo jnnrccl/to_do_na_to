@@ -36,7 +36,6 @@ dependencies:
   awesome_dialog: ^2.0.0
   stop_watch_timer: ^1.2.0+1
   fluttertoast: ^8.0.7
-  grouped_list: ^4.0.0
   collection: ^1.15.0
 
 

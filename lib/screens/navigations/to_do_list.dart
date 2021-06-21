@@ -214,16 +214,6 @@ class _ToDoScreenState extends State<ToDoScreen> {
     );
   }
 
-  int getLen(grouped){
-    if (grouped.keys.length == 0){
-      return 0;
-    }
-    else{
-      return grouped.keys.length;
-    }
-
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
