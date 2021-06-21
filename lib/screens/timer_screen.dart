@@ -577,47 +577,98 @@ class _TimerScreenState extends State<TimerScreen> {
                   delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
                       if (index == 0) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 22.0),
-                              decoration: BoxDecoration(
-                                color: Colors.deepPurple,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(35),
-                                  topRight: Radius.circular(35),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.deepPurple,
-                                    blurRadius: 0.0,
-                                    spreadRadius: 0.0,
-                                    offset: Offset(0, 1),
+                        if(allTasks.length == 0){
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 22.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepPurple,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(35),
+                                    topRight: Radius.circular(35),
                                   ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(
-                                    "Select a task",
-                                    style: GoogleFonts.rubik(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 22,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.deepPurple,
+                                      blurRadius: 0.0,
+                                      spreadRadius: 0.0,
+                                      offset: Offset(0, 1),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      "Select a task",
+                                      style: GoogleFonts.rubik(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            //SizedBox(height: 10),
-                          ],
-                        );
+                              //SizedBox(height: 10),
+                              Container(
+                                color: Colors.deepPurple,
+                                child: Text(
+                                  'empty',
+                                  style: GoogleFonts.rubik(
+                                    color: Colors.black,
+                                    fontSize: 50.0,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        else{
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 22.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepPurple,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(35),
+                                    topRight: Radius.circular(35),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.deepPurple,
+                                      blurRadius: 0.0,
+                                      spreadRadius: 0.0,
+                                      offset: Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      "Select a task",
+                                      style: GoogleFonts.rubik(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              //SizedBox(height: 10),
+                            ],
+                          );
+                        }
+
                       }
-                      if (index == 0) {
-                        return Container(color: Colors.transparent);
-                      }
+
                       if (allTasks[index - 1].status == 0 || allTasks[index - 1].status == 1) {
                         return _buildTask(snapshot, index, allTasks[index - 1]);
                       }

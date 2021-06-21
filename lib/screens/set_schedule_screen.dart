@@ -302,9 +302,23 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                   delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
                       if (index == 0) {
-                        return Container(
-                          color: Colors.transparent,
-                        );
+                        if(allTasks.length == 0){
+                          return Container(
+                            child: Text(
+                              'empty',
+                              style: GoogleFonts.rubik(
+                                color: Colors.black,
+                                fontSize: 50.0,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          );
+                        }
+                        else{
+                          return Container(
+                            color: Colors.transparent,
+                          );
+                        }
                       }
                       if(allTasks[index - 1].status != 2){
                         return _buildTask(snapshot, index, allTasks[index - 1]);

@@ -60,9 +60,8 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
           _elements.add(map);
         }
       }
-      grouped = groupBy(_elements, (obj) => obj['date']);
-    }
 
+    }
   }
 
   _updateSchedule(element){
@@ -86,16 +85,6 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
         Notifications().deleteTask(tempTask);
       }
     }
-  }
-
-  int getLen(grouped){
-    if (grouped == null){
-      return 0;
-    }
-    else{
-      return grouped.keys.length;
-    }
-
   }
 
   @override
@@ -124,9 +113,8 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
             }
             if (snapshot.hasData){
               elem = snapshot.data;
-              if (elem.isNotEmpty) {
-                _fromModelToElements(elem);
-              }
+              _fromModelToElements(elem);
+              grouped = groupBy(_elements, (obj) => obj['date']);
             }
             return NestedScrollView(
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -193,11 +181,27 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
                 slivers: <Widget> [
                   SliverList(
                     delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                      if (index == 0) {
-                        return Container(
-                          color: Colors.transparent,
-                        );
+                      if (index == 0){
+
+                        if(grouped.keys.length == 0){
+                          return Container(
+                            child: Text(
+                              'empty',
+                              style: GoogleFonts.rubik(
+                                color: Colors.black,
+                                fontSize: 50.0,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          );
+                        }
+                        else{
+                          return Container(
+                            color: Colors.transparent,
+                          );
+                        }
                       }
+
                       String dates = grouped.keys.toList()[index-1];
                       final scheds = grouped[dates];
 
@@ -479,7 +483,7 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
                         ),
                       );
                     },
-                        childCount: getLen(grouped) + 1),
+                        childCount: grouped.keys.length + 1),
                   ),
                   SliverToBoxAdapter(
                     child: SizedBox(height: 80.0),
