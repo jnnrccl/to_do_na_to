@@ -22,6 +22,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
   TextEditingController _dateController = TextEditingController();
   DateTime _date = DateTime.now();
   List <String> listSchedule = [];
+  List<Task> allTasks;
 
   AwesomeDialog dialog;
   bool enableNotif = false;
@@ -241,6 +242,33 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                 child: CircularProgressIndicator(),
               );
             }
+            if(snapshot.hasData){
+              allTasks = snapshot.data;
+
+              allTasks.sort((a,b) {
+                int first, second;
+                if (a.priority == 'Low')
+                  first = 3;
+                else if (a.priority == 'Medium')
+                  first = 2;
+                else
+                  first = 1;
+
+                if (b.priority == 'Low')
+                  second = 3;
+                else if (b.priority == 'Medium')
+                  second = 2;
+                else
+                  second = 1;
+
+                if (a.date.month == b.date.month && a.date.day == b.date.day && a.date.year == b.date.year){
+                  return first.compareTo(second);
+                }
+                else{
+                  return a.date.compareTo(b.date);
+                }
+              });
+            }
             return CustomScrollView(
               slivers: <Widget> [
                 SliverToBoxAdapter(
@@ -278,8 +306,8 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                           color: Colors.transparent,
                         );
                       }
-                      if(snapshot.data[index - 1].status != 2){
-                        return _buildTask(snapshot, index, snapshot.data[index - 1]);
+                      if(allTasks[index - 1].status != 2){
+                        return _buildTask(snapshot, index, allTasks[index - 1]);
                       }
                       return Container(color: Colors.indigo);
                     },

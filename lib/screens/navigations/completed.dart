@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -22,6 +23,9 @@ class CompletedNavigationScreen extends StatefulWidget {
 class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
   Future<List<Task>> _taskList;
   final DateFormat _dateFormatter = DateFormat('MMM d, h:mm a');
+  final DateFormat _anotherDateFormatter = DateFormat('MMM d');
+  List<Task> elem = [];
+  var grouped;
 
   @override
   void initState() {
@@ -31,7 +35,7 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
 
   _updateTaskList() {
     setState(() {
-      _taskList = DatabaseConnection.instance.getTaskList();
+      _taskList = DatabaseConnection.instance.getTaskCompList();
     });
   }
 
@@ -117,7 +121,7 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
             ),
             onDismissed: (direction) {
               Notifications().deleteTask(task);
-              snapshot.data.removeAt(index-1);
+              snapshot.data.removeAt(index);
               DatabaseConnection.instance.deleteTask(task.id);
               _updateTaskList();
             },
@@ -199,6 +203,7 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
     return Scaffold(
       drawer: DrawerNavigation(selectedDestination: 0),
       floatingActionButton: FloatingActionButton(
+        key: Key('floating-add'),
         backgroundColor: Colors.indigo,
         child: Icon(Icons.add, color: Colors.white),
         onPressed: () => Navigator.push(context, MaterialPageRoute(
@@ -216,22 +221,63 @@ class _CompletedNavigationScreenState extends State<CompletedNavigationScreen> {
               child: CircularProgressIndicator(),
             );
           }
+          if (snapshot.hasData){
+            elem = snapshot.data;
+            grouped = groupBy(elem, (obj) {
+              String d = _anotherDateFormatter.format(obj.date);
+              return d;
+            });
+          }
           return CustomScrollView(
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                       (BuildContext context, int index) {
-                    if (index == 0) {
-                      return Container(
-                        color: Colors.transparent,
-                      );
+                    if (index == 0){
+                      if(grouped.keys.length == 0){
+                        return Container(
+                          child: Text(
+                            'empty',
+                            style: GoogleFonts.rubik(
+                              color: Colors.black,
+                              fontSize: 50.0,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        );
+                      }
+                      else{
+                        return Container(
+                          color: Colors.transparent,
+                        );
+                      }
                     }
-                    if(snapshot.data[index - 1].status == 2){
-                      return _buildTask(snapshot, index, snapshot.data[index - 1]);
-                    }
-                    return Container();
+
+                    String dates = grouped.keys.toList()[index-1];
+                    List<Task> scheds = grouped[dates];
+
+                    return Column(
+                      children: [
+                        Text(
+                          dates,
+                          style: TextStyle(color: Colors.black,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: scheds.length,
+                          itemBuilder: (context, index){
+                            if (scheds[index].status == 2) {
+                              return _buildTask(snapshot, index, scheds[index]);
+                            }
+                            return Container();
+                          },
+                        ),
+                      ],
+                    );
                   },
-                  childCount: 1 + snapshot.data.length,
+                  childCount: 1 + grouped.keys.length,
                 ),
               ),
               SliverToBoxAdapter(

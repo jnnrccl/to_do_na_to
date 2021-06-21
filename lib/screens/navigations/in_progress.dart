@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -23,6 +24,9 @@ class InProgressNavigationScreen extends StatefulWidget {
 class _InProgressNavigationScreenState extends State<InProgressNavigationScreen> {
   Future<List<Task>> _taskList;
   final DateFormat _dateFormatter = DateFormat('MMM d, h:mm a');
+  final DateFormat _anotherDateFormatter = DateFormat('MMM d');
+  List<Task> elem = [];
+  var grouped;
 
   @override
   void initState() {
@@ -32,7 +36,7 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
 
   _updateTaskList() {
     setState(() {
-      _taskList = DatabaseConnection.instance.getTaskList();
+      _taskList = DatabaseConnection.instance.getTaskInProgList();
     });
   }
 
@@ -137,14 +141,14 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
             ),
             onDismissed: (direction) {
               if (direction == DismissDirection.endToStart){
-                snapshot.data.removeAt(index-1);
+                snapshot.data.removeAt(index);
                 DatabaseConnection.instance.deleteTask(task.id);
               }
               else{
                 task.status = 2;
                 DatabaseConnection.instance.updateTask(task);
                 _addTaskToComplete(task);
-                snapshot.data.removeAt(index-1);
+                snapshot.data.removeAt(index);
               }
               Notifications().deleteTask(task);
               _updateTaskList();
@@ -233,6 +237,7 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
     return Scaffold(
       drawer: DrawerNavigation(selectedDestination: 0),
       floatingActionButton: FloatingActionButton(
+        key: Key('floating-add'),
         backgroundColor: Colors.indigo,
         child: Icon(Icons.add, color: Colors.white),
         onPressed: () => Navigator.push(context, MaterialPageRoute(
@@ -250,22 +255,90 @@ class _InProgressNavigationScreenState extends State<InProgressNavigationScreen>
               child: CircularProgressIndicator(),
             );
           }
+          if (snapshot.hasData){
+            elem = snapshot.data;
+            grouped = groupBy(elem, (obj) {
+              String d = _anotherDateFormatter.format(obj.date);
+              return d;
+            });
+
+          }
           return CustomScrollView(
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                       (BuildContext context, int index) {
-                    if (index == 0) {
-                      return Container(
-                        color: Colors.transparent,
-                      );
+
+                    if (index == 0){
+                      if(grouped.keys.length == 0){
+                        return Container(
+                          child: Text(
+                            'empty',
+                            style: GoogleFonts.rubik(
+                              color: Colors.black,
+                              fontSize: 50.0,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        );
+                      }
+                      else{
+                        return Container(
+                          color: Colors.transparent,
+                        );
+                      }
                     }
-                    if(snapshot.data[index - 1].status == 1){
-                      return _buildTask(snapshot, index, snapshot.data[index - 1]);
-                    }
-                    return Container();
+
+                    String dates = grouped.keys.toList()[index-1];
+                    List<Task> scheds = grouped[dates];
+
+                    scheds.sort((a,b) {
+                      int first, second;
+                      if (a.priority == 'Low')
+                        first = 3;
+                      else if (a.priority == 'Medium')
+                        first = 2;
+                      else
+                        first = 1;
+
+                      if (b.priority == 'Low')
+                        second = 3;
+                      else if (b.priority == 'Medium')
+                        second = 2;
+                      else
+                        second = 1;
+
+                      if (first.compareTo(second) == 0){
+                        return a.date.compareTo(b.date);
+                      }
+                      else{
+                        return first.compareTo(second);
+                      }
+
+                    });
+
+                    return Column(
+                      children: [
+                        Text(
+                          dates,
+                          style: TextStyle(color: Colors.black,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: scheds.length,
+                          itemBuilder: (context, index){
+                            if (scheds[index].status == 1) {
+                              return _buildTask(snapshot, index, scheds[index]);
+                            }
+                            return Container();
+                          },
+                        ),
+                      ],
+                    );
                   },
-                  childCount: 1 + snapshot.data.length,
+                  childCount: 1 + grouped.keys.length,
                 ),
               ),
               SliverToBoxAdapter(

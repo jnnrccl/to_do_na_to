@@ -1,5 +1,5 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -26,6 +26,7 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
   List<dynamic> _elements = [];
   List<Task> elem = [];
   List <String> listSchedule = [];
+  var grouped;
 
   @override
   void initState() {
@@ -59,8 +60,9 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
           _elements.add(map);
         }
       }
+      grouped = groupBy(_elements, (obj) => obj['date']);
     }
-    //print(_elements);
+
   }
 
   _updateSchedule(element){
@@ -84,6 +86,16 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
         Notifications().deleteTask(tempTask);
       }
     }
+  }
+
+  int getLen(grouped){
+    if (grouped == null){
+      return 0;
+    }
+    else{
+      return grouped.keys.length;
+    }
+
   }
 
   @override
@@ -177,181 +189,302 @@ class _SchedulerScreenState extends State<SchedulerScreen> {
                   ),
                 ];
               },
-              body: GroupedListView <dynamic,String> (
-                elements: _elements,
-                groupBy: (element) => element['date'],
-                groupComparator: (value1, value2) => value2.compareTo(value1),
-                itemComparator: (item1, item2) => item2['dateTime'].compareTo(item1['dateTime']),
-                order: GroupedListOrder.DESC,
-                //useStickyGroupSeparators: true,
-                padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
-                groupSeparatorBuilder: (String value) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    value,
-                    textAlign: TextAlign.left,
-                    style: GoogleFonts.rubik(
-                      color: Colors.blue.shade800,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                itemBuilder: (c, element) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Column(
-                      children: <Widget>[
-                        //SizedBox(height: 5.0),
-                        Dismissible(
-                          key: UniqueKey(),
-                          background: Container(
-                            padding: EdgeInsets.symmetric(vertical: 3.0),
-                            margin: EdgeInsets.symmetric(vertical: 3.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.redAccent,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  blurRadius: 2.0,
-                                  offset: Offset(0.0, 1.0), // shadow direction: bottom right
-                                )
-                              ],
-                            ),
-                            child: Align(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    margin: EdgeInsets.only(left: 15.0),
-                                  ),
-                                  Text(
-                                    "Delete",
-                                    style: GoogleFonts.rubik(
-                                      color: Colors.white,
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                ],
+              body: CustomScrollView(
+                slivers: <Widget> [
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                      if (index == 0) {
+                        return Container(
+                          color: Colors.transparent,
+                        );
+                      }
+                      String dates = grouped.keys.toList()[index-1];
+                      final scheds = grouped[dates];
+
+                      scheds.sort((a,b) {
+                        DateTime first = a['dateTime'];
+                        DateTime second = b['dateTime'];
+                        return first.compareTo(second);
+                      });
+
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 20),
+                            Text(
+                              dates,
+                              style: GoogleFonts.rubik(
+                                color: Colors.blue.shade800,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
                               ),
-                              //alignment: Alignment.centerLeft,
                             ),
-                          ),
-                          secondaryBackground: Container(
-                            padding: EdgeInsets.symmetric(vertical: 3.0),
-                            margin: EdgeInsets.symmetric(vertical: 3.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.redAccent,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  blurRadius: 2.0,
-                                  offset: Offset(0.0, 1.0), // shadow direction: bottom right
-                                )
-                              ],
-                            ),
-                            child: Align(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Container(
-                                    margin: EdgeInsets.only(right: 260.0),
-                                  ),
-                                  Text(
-                                    "Delete",
-                                    style: GoogleFonts.rubik(
-                                      color: Colors.white,
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                ],
-                              ),
-                              alignment: Alignment.centerRight,
-                            ),
-                          ),
-                          onDismissed: (direction) {
-                            _elements.remove(element);
-                            _updateSchedule(element);
-                            _updateTaskList();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 3.0),
-                            margin: EdgeInsets.symmetric(vertical: 3.0),
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade800,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  blurRadius: 2.0,
-                                  offset: Offset(0.0, 1.0), // shadow direction: bottom right
-                                ),
-                              ],
-                            ),
-                            child: ListTile(
-                              leading: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget> [
-                                  Container(
-                                    width: 95.0,
-                                    child: Center(
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          element['time'],
-                                          style: GoogleFonts.rubik(
-                                            color: Colors.white,
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.w600,
+                            SizedBox(height: 10),
+                            ListView.builder(
+                              padding: EdgeInsets.all(0),
+                              shrinkWrap: true,
+                              primary: false,
+                              itemCount: scheds.length,
+                              itemBuilder: (context, index){
+                                return Column(
+                                  children: <Widget>[
+                                    Dismissible(
+                                      key: UniqueKey(),
+                                      background: Container(
+                                        padding: EdgeInsets.symmetric(vertical: 3.0),
+                                        margin: EdgeInsets.symmetric(vertical: 3.0),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(20),
+                                          color: Colors.redAccent,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.5),
+                                              blurRadius: 2.0,
+                                              offset: Offset(0.0, 1.0), // shadow direction: bottom right
+                                            )
+                                          ],
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(left: 15.0),
+                                              child: Text(
+                                                "Delete",
+                                                style: GoogleFonts.rubik(
+                                                  color: Colors.white,
+                                                  fontSize: 18.0,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      secondaryBackground: Container(
+                                        padding: EdgeInsets.symmetric(vertical: 3.0),
+                                        margin: EdgeInsets.symmetric(vertical: 3.0),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(20),
+                                          color: Colors.redAccent,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.5),
+                                              blurRadius: 2.0,
+                                              offset: Offset(0.0, 1.0), // shadow direction: bottom right
+                                            )
+                                          ],
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(right: 15.0),
+                                              child: Text(
+                                                "Delete",
+                                                style: GoogleFonts.rubik(
+                                                  color: Colors.white,
+                                                  fontSize: 18.0,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      onDismissed: (direction) {
+                                        _elements.remove(scheds[index]);
+                                        _updateSchedule(scheds[index]);
+                                        _updateTaskList();
+                                      },
+                                      confirmDismiss: (DismissDirection dismissDirection) async {
+                                        return await showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text(
+                                                "Confirm",
+                                                style: GoogleFonts.rubik(
+                                                  color: Colors.black,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              content: Text(
+                                                "Are you sure?",
+                                                style: GoogleFonts.rubik(
+                                                  color: Colors.black,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              actions: <Widget>[
+                                                // ignore: deprecated_member_use
+                                                FlatButton(
+                                                  onPressed: () => Navigator.of(context).pop(true),
+                                                  child: Text(
+                                                    "Yes",
+                                                    style: GoogleFonts.rubik(
+                                                      color: Colors.blue.shade800,
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                                // ignore: deprecated_member_use
+                                                FlatButton(
+                                                  onPressed: () => Navigator.of(context).pop(false),
+                                                  child: Text(
+                                                    "No",
+                                                    style: GoogleFonts.rubik(
+                                                      color: Colors.blue.shade800,
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 85,
+                                        margin: EdgeInsets.symmetric(vertical: 3.0),
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.5),
+                                              blurRadius: 2,
+                                              offset: Offset(3,3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                                          child: Container(
+                                            child: Stack(
+                                              children: [
+                                                Container(
+                                                  width: 12,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.blue.shade800,
+                                                  ),
+                                                ),
+                                                Row(
+                                                  children: <Widget> [
+                                                    Container(
+                                                      width: 120,
+                                                      padding: EdgeInsets.only(left: 28.0),
+                                                      child: Column(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text(
+                                                            scheds[index]['time'],
+                                                            style: GoogleFonts.rubik(
+                                                              color: Colors.blue.shade800,
+                                                              fontSize: 14.0,
+                                                              fontWeight: FontWeight.w600,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Container(
+                                                        padding: EdgeInsets.only(left: 15.0),
+                                                        child: Column(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
+                                                              scheds[index]['subjectName'],
+                                                              style: GoogleFonts.rubik(
+                                                                color: Colors.blue.shade800,
+                                                                fontSize: 14.0,
+                                                                fontWeight: FontWeight.w600,
+                                                              ),
+                                                            ),
+                                                            SizedBox(height: 3.0),
+                                                            Text(
+                                                              scheds[index]['taskName'],
+                                                              style: GoogleFonts.rubik(
+                                                                color: Colors.blue.shade800,
+                                                                fontSize: 14.0,
+                                                                fontWeight: FontWeight.w400,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                /*ListTile(
+                                                  leading: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: <Widget> [
+                                                      Container(
+                                                        width: 95.0,
+                                                        child: Center(
+                                                          child: Align(
+                                                            alignment: Alignment.centerLeft,
+                                                            child: Text(
+                                                              scheds[index]['time'],
+                                                              style: GoogleFonts.rubik(
+                                                                color: Colors.blue.shade800,
+                                                                fontSize: 14.0,
+                                                                fontWeight: FontWeight.w600,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  title: Text(
+                                                    scheds[index]['subjectName'],
+                                                    style: GoogleFonts.rubik(
+                                                      color: Colors.blue.shade800,
+                                                      fontSize: 14.0,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  subtitle: Text(
+                                                    scheds[index]['taskName'],
+                                                    style: GoogleFonts.rubik(
+                                                      color: Colors.blue.shade800,
+                                                      fontSize: 14.0,
+                                                      fontWeight: FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ),*/
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              title: Text(
-                                element['subjectName'],
-                                style: GoogleFonts.rubik(
-                                  color: Colors.white,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              subtitle: Text(
-                                element['taskName'],
-                                style: GoogleFonts.rubik(
-                                  color: Colors.white,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              /*onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => AddTaskScreen(
-                                  updateTaskList: _updateTaskList,
-                                  task: task,
-                                ),),
-                              ),*/
+                                  ],
+                                );
+                              },
                             ),
-                          ),
+                          ],
                         ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                      );
+                    },
+                        childCount: getLen(grouped) + 1),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: 80.0),
+                  ),
+                ],
               ),
             );
           }

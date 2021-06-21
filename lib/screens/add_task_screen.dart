@@ -28,9 +28,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   TextEditingController _dateController = TextEditingController();
 
   final DateFormat _dateFormatter = DateFormat('yyyy-MM-dd HH:mm');
-  final List<String> _priorities = ['Low', 'Medium', 'High'];
+  //final List<String> _priorities = ['Low', 'Medium', 'High'];
 
   bool enableNotif = false;
+  bool alreadyIn = false;
+
+  List<Task> taskList;
 
   @override
   void initState() {
@@ -61,8 +64,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       lastDate: DateTime(2100),
     );
     if (onlyDate != null) {
-      final TimeOfDay onlyTime =
-      await showTimePicker(context: context, initialTime: TimeOfDay.now());
+      final TimeOfDay onlyTime = await showTimePicker(context: context, initialTime: TimeOfDay.now());
       if (onlyTime != null) {
         var finalDate = DateTime(onlyDate.year, onlyDate.month, onlyDate.day,
             onlyTime.hour, onlyTime.minute);
@@ -74,6 +76,31 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         }
       }
     }
+  }
+
+  bool itIsThere(){
+    return true;
+  }
+
+  Future <bool> isItPresent(Task localTask) async {
+    taskList = await DatabaseConnection.instance.getTaskToDoList();
+
+    for (Task task in taskList){
+      if (task.subjectName.toLowerCase() == localTask.subjectName.toLowerCase()
+          && task.taskName.toLowerCase() == localTask.taskName.toLowerCase()){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool isNotSameTask(localTask){
+    if (widget.task.subjectName.toLowerCase() == localTask.subjectName.toLowerCase()
+        && widget.task.taskName.toLowerCase() == localTask.taskName.toLowerCase()){
+      return false;
+    }
+    else
+      return true;
   }
 
   static var id = Random.secure();
@@ -89,22 +116,63 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         taskName: _taskName,
         priority: _priority,
         date: _date,
-        status: 0,
         scheduler: _scheduler,
         stopTime: "00:00:00:00",
       );
       //CREATE TASK
       if (widget.task == null) {
-        DatabaseConnection.instance.insertTask(localTask);
-        if (enableNotif == true)
-          Notifications().scheduleTask(localTask);
+        localTask.status = 0;
+        alreadyIn = false;
+        alreadyIn = await isItPresent(localTask);
+        if (alreadyIn == false){
+          DatabaseConnection.instance.insertTask(localTask);
+          if (enableNotif == true)
+            Notifications().scheduleTask(localTask);
+        }
+        else{
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+              content: Text(
+                "Subject Name and Task Name already exist.",
+                key: const Key("Error"),
+                style: GoogleFonts.rubik(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
+        }
+
       }
       //UPDATE TASK
       else {
-        DatabaseConnection.instance.updateTask(localTask);
-        print('$_scheduler');
-        if (enableNotif == true)
-          Notifications().updateTask(localTask);
+        localTask.status = widget.task.status;
+        alreadyIn = false;
+        alreadyIn = isNotSameTask(localTask);
+        if (alreadyIn == false){
+          DatabaseConnection.instance.updateTask(localTask);
+          print('$_scheduler');
+          if (enableNotif == true)
+            Notifications().updateTask(localTask);
+        }
+        else{
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+              content: Text(
+                "Subject Name and Task Name already exist.",
+                key: const Key("Error"),
+                style: GoogleFonts.rubik(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
+        }
+
       }
       widget.updateTaskList();
       Navigator.pop(context);
@@ -114,7 +182,20 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Icon(
+            Icons.arrow_back_ios,
+            size: 22.0,
+            color: Colors.indigo,
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
+        key: Key('floating-save'),
         backgroundColor: Colors.indigo,
         child: Icon(Icons.save_rounded, color: Colors.white),
         onPressed: _submit,
@@ -123,18 +204,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 80.0),
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Icon(
-                      Icons.arrow_back_ios,
-                      size: 25.0,
-                      color: Colors.indigo,
-                    )),
-                SizedBox(height: 20.0),
                 Text(
                   widget.task == null ? 'Add a task' : 'Edit task',
                   style: GoogleFonts.rubik(
@@ -151,6 +224,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: TextFormField(
+                          key: Key('subject-name'),
                           style: GoogleFonts.rubik(
                             fontSize: 18,
                             fontWeight: FontWeight.w300,
@@ -173,12 +247,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: TextFormField(
+                          key: Key('task-name'),
                           style: GoogleFonts.rubik(
                             fontSize: 18,
                             fontWeight: FontWeight.w300,
                           ),
                           decoration: InputDecoration(
-                              labelText: 'Task Title',
+                              labelText: 'Task Name',
                               labelStyle: GoogleFonts.rubik(
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.w300,
@@ -194,6 +269,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: TextFormField(
+                          key: Key('deadline'),
                           readOnly: true,
                           controller: _dateController,
                           style: GoogleFonts.rubik(
@@ -216,25 +292,63 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: DropdownButtonFormField(
+                          key: Key('priority'),
                           icon: Icon(Icons.arrow_drop_down),
                           //iconSize: 25.0,
                           iconEnabledColor: Colors.indigo,
-                          items: _priorities.map((String priority) {
-                            return DropdownMenuItem(
-                              value: priority,
+                          items: [
+                            DropdownMenuItem<String>(
+                              key: Key('low'),
+                              value: 'Low',
                               child: Text(
-                                priority,
+                                'Low',
                                 style: GoogleFonts.rubik(
-                                  color:
-                                  priority == 'Low' ? Colors.yellow.shade800
-                                      : priority == 'Medium' ? Colors.orange.shade800
-                                      : Colors.red,
+                                  color: Colors.yellow.shade800,
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            );
-                          }).toList(),
+                            ),
+                            DropdownMenuItem<String>(
+                              key: Key('medium'),
+                              value: 'Medium',
+                              child: Text(
+                                'Medium',
+                                style: GoogleFonts.rubik(
+                                  color: Colors.orange.shade800,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            DropdownMenuItem<String>(
+                              key: Key('high'),
+                              value: 'High',
+                              child: Text(
+                                'High',
+                                style: GoogleFonts.rubik(
+                                  color: Colors.red,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                          /*items: _priorities.map((String priority) {
+                              return DropdownMenuItem(
+                                value: priority,
+                                child: Text(
+                                  priority,
+                                  style: GoogleFonts.rubik(
+                                    color: priority == 'Low' ? Colors.yellow.shade800
+                                         : priority == 'Medium' ? Colors.orange.shade800
+                                         : Colors.red,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              );
+                            }).toList(),*/
                           style: GoogleFonts.rubik(
                             fontSize: 18,
                             fontWeight: FontWeight.w300,

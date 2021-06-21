@@ -26,7 +26,7 @@ class FieldValidator{
     DateTime date = DateTime.parse(value);
     //print(value);
     if (date.compareTo(DateTime.now()) < 0) {
-      return 'Wrong Date Time';
+      return 'Date and time has passed.';
     }
     else{
       return null;

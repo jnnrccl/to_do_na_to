@@ -148,8 +148,8 @@ class _HomeScreenState extends  State<HomeScreen> {
               index: _pageIndex,
               height: 50.0,
               items: <Widget>[
-                Icon(Icons.library_books, size: 20, color: Colors.white),
                 Icon(Icons.library_add, size: 20, color: Colors.white),
+                Icon(Icons.library_books, size: 20, color: Colors.white),
                 Icon(Icons.library_add_check, size: 20, color: Colors.white),
               ],
               color: Colors.indigo,

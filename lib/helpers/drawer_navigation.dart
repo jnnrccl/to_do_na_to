@@ -1,10 +1,13 @@
 import'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:to_do_na_to/models/task_model.dart';
 import 'package:to_do_na_to/screens/analytics_screen.dart';
 import 'package:to_do_na_to/screens/scheduler_screen.dart';
-import 'package:to_do_na_to/screens/settings_screen.dart';
 import 'package:to_do_na_to/screens/timer_screen.dart';
 import '../screens/home_screen.dart';
+import 'database_connection.dart';
+import 'local_notification.dart';
 
 // ignore: must_be_immutable
 class DrawerNavigation extends StatefulWidget {
@@ -14,13 +17,45 @@ class DrawerNavigation extends StatefulWidget {
   _DrawerNavigationState createState() => _DrawerNavigationState();
 }
 
+Notifications _notifications = Notifications();
+
 class _DrawerNavigationState extends State<DrawerNavigation> {
   int _selectedDestination;
+  Future<List<Task>> allTasks;
+  List <Task> taskList;
+  bool enableNotif = false;
 
   @override
   void initState(){
     super.initState();
+    _setVal();
     _selectedDestination = widget.selectedDestination;
+  }
+
+  _setVal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      enableNotif = prefs.getBool('enable_notif') ?? false;
+    });
+    await prefs.setBool('enable_notif', enableNotif);
+  }
+
+  _changeVal(String key, bool value) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+  _handleNotifications() async {
+    List taskList = await DatabaseConnection.instance.getTaskList();
+    var len = taskList.length-1;
+    if (enableNotif == true) {
+      for (var i = 0; i<= len; i++) {
+        Notifications().scheduleTask(taskList[i]);
+      }
+    }
+    else {
+      await _notifications.cancelNotification();
+    }
   }
 
   @override
@@ -31,11 +66,14 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
           padding: EdgeInsets.zero,
           children: <Widget> [
             DrawerHeader(
-              child  : Text('MENU', style: GoogleFonts.rubik(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.w200,
-              )),
+              child: Text(
+                'MENU',
+                style: GoogleFonts.rubik(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w200,
+                ),
+              ),
               decoration: BoxDecoration(
                 color: Colors.indigo,
               ),
@@ -44,7 +82,12 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
             ),
             ListTile(
               leading: Icon(Icons.chrome_reader_mode_outlined),
-              title: Text('Dashboard'),
+              title: Text(
+                'Dashboard',
+                /*style: GoogleFonts.rubik(
+                  fontWeight: FontWeight.w500,
+                ),*/
+              ),
               selected: _selectedDestination == 0,
               onTap: () => Navigator.push(
                 context,
@@ -86,16 +129,18 @@ class _DrawerNavigationState extends State<DrawerNavigation> {
                 ),
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.notifications_active),
-              title: Text('Notification Settings'),
-              selected: _selectedDestination == 4,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SettingsScreen(),
-                ),
-              ),
+            Divider(),
+            SwitchListTile(
+              activeColor: Colors.indigo,
+              title: Text('Enable Notifications'),
+              value: enableNotif,
+              onChanged: (bool value) {
+                setState(() {
+                  _changeVal('enable_notif', value);
+                  enableNotif = value;
+                });
+                _handleNotifications();
+              },
             ),
           ],
         ),

@@ -88,6 +88,42 @@ class DatabaseConnection{
     return taskList;
   }
 
+  Future<List<Task>> getTaskToDoList() async {
+    final List<Map<String, dynamic>> taskMapList = await getTaskMapList();
+    final List<Task> taskList = [];
+    taskMapList.forEach((taskMap){
+      if (taskMap['status'] == 0){
+        taskList.add(Task.fromMap(taskMap));
+      }
+    });
+    taskList.sort((taskA, taskB) => taskA.date.compareTo(taskB.date));
+    return taskList;
+  }
+
+  Future<List<Task>> getTaskInProgList() async {
+    final List<Map<String, dynamic>> taskMapList = await getTaskMapList();
+    final List<Task> taskList = [];
+    taskMapList.forEach((taskMap){
+      if (taskMap['status'] == 1){
+        taskList.add(Task.fromMap(taskMap));
+      }
+    });
+    taskList.sort((taskA, taskB) => taskA.date.compareTo(taskB.date));
+    return taskList;
+  }
+
+  Future<List<Task>> getTaskCompList() async {
+    final List<Map<String, dynamic>> taskMapList = await getTaskMapList();
+    final List<Task> taskList = [];
+    taskMapList.forEach((taskMap){
+      if (taskMap['status'] == 2){
+        taskList.add(Task.fromMap(taskMap));
+      }
+    });
+    taskList.sort((taskA, taskB) => taskA.date.compareTo(taskB.date));
+    return taskList;
+  }
+
   Future<List<Task>> getTasksOnDate(String date) async{
     Database db = await this.db;
     final List<Map<String, dynamic>> queryRows = await db.rawQuery('SELECT * FROM task_table WHERE date = ?', [date]);

@@ -260,6 +260,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
             }
             if(snapshot.hasData){
               List<Task> allEvents = snapshot.data;
+
+              allEvents.sort((a,b) {
+                int first, second;
+                if (a.priority == 'Low')
+                  first = 3;
+                else if (a.priority == 'Medium')
+                  first = 2;
+                else
+                  first = 1;
+
+                if (b.priority == 'Low')
+                  second = 3;
+                else if (b.priority == 'Medium')
+                  second = 2;
+                else
+                  second = 1;
+
+                if (first.compareTo(second) == 0){
+                  return a.date.compareTo(b.date);
+                }
+                else{
+                  return first.compareTo(second);
+                }
+
+              });
+
               if (allEvents.isNotEmpty) {
                 _events = _fromModelToEvent(allEvents);
               }
