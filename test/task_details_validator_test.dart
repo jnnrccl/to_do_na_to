@@ -46,13 +46,13 @@ void main(){
   test('Before Current Date Test', () {
     DateTime today = DateTime.now();
     var result = FieldValidator.validateDate(today.subtract(new Duration(days: 1)).toString());
-    expect(result, 'Wrong Date Time');
+    expect(result, 'Date and time has passed.');
   });
 
   test('Current Date Before Current Time Test', () {
     DateTime today = DateTime.now();
     var result = FieldValidator.validateDate(today.subtract(new Duration(hours: 1)).toString());
-    expect(result, 'Wrong Date Time');
+    expect(result, 'Date and time has passed.');
   });
 
   /*test('Current Date Test', () {
