@@ -28,7 +28,7 @@ jobs:
     strategy:
       #set of different configurations of the virtual environment.
       matrix:
-        api-level: [30]
+        api-level: [21, 29]
         target: [default]
     needs: flutter_test
     steps:
@@ -46,4 +46,4 @@ jobs:
           target: ${{ matrix.target }}
           arch: x86_64
           profile: Nexus 6
-          script: flutter drive --target=test_driver/app.dart
+          script: flutter drive --driver=test_driver/integration_driver.dart --target=integration_test/app_test.dart
